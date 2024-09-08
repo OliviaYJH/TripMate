@@ -1,4 +1,4 @@
-package com.example.tripmate;
+package com.gbsb.tripmate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

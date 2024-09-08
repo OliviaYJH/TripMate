@@ -1,4 +1,4 @@
-package com.example.tripmate;
+package com.gbsb.tripmate;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
