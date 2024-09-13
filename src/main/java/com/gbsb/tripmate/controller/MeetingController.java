@@ -1,15 +1,11 @@
 package com.gbsb.tripmate.controller;
 
 import com.gbsb.tripmate.dto.BaseResponse;
+import com.gbsb.tripmate.dto.JoinMeeting;
 import com.gbsb.tripmate.dto.UpdateMeeting;
-import com.gbsb.tripmate.entity.MeetingEntity;
-import com.gbsb.tripmate.entity.UserEntity;
 import com.gbsb.tripmate.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +14,7 @@ public class MeetingController {
     private final MeetingService meetingService;
 
     @PutMapping("/{groupId}")
-    BaseResponse<Boolean> updateTripGroup(
+    BaseResponse<Boolean> updateMeeting(
             @PathVariable Long groupId,
             @RequestBody UpdateMeeting.Request request
     ) {
@@ -29,20 +25,19 @@ public class MeetingController {
         return new BaseResponse<>("모임 수정 성공", true);
     }
 
-    @PostMapping("/{groupId}/join")
-    BaseResponse<Boolean> joinTripGroup(
-            @PathVariable Long groupId,
-            @RequestParam Long memberId,
-            @RequestParam LocalDate travelStartDate,
-            @RequestParam LocalDate travelEndDate
-    ) {
+    @PostMapping("/join/{meetingId}")
+    BaseResponse<Boolean> joinMeeting(
+            @PathVariable Long meetingId,
+            @RequestBody JoinMeeting.Request request
+            ) {
+        meetingService.joinMeeting(meetingId, request);
         return new BaseResponse<>("모임 참여 성공", true);
     }
 
-    @GetMapping("/{userId}")
-    Optional<UserEntity> getMember(
-            @PathVariable Long userId
-    ) {
-        return meetingService.getMember(userId);
-    }
+//    @GetMapping("/{userId}")
+//    Optional<UserEntity> getMember(
+//            @PathVariable Long userId
+//    ) {
+//        return meetingService.getMember(userId);
+//    }
 }
