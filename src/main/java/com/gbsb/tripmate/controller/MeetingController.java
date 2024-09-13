@@ -18,10 +18,7 @@ public class MeetingController {
             @PathVariable Long groupId,
             @RequestBody UpdateMeeting.Request request
     ) {
-        // 하나라도 Null이면 error 처리
-        // enum은 타입 맞는지 확인
-        // 여행 시작일은 오늘로부터 3일 이후부터 가능
-        meetingService.updateTripGroup(groupId, request);
+        meetingService.updateMeeting(groupId, request);
         return new BaseResponse<>("모임 수정 성공", true);
     }
 
