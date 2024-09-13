@@ -1,16 +1,13 @@
 package com.gbsb.tripmate.entity;
 
-import com.gbsb.tripmate.dto.UpdateTripGroup;
+import com.gbsb.tripmate.dto.UpdateMeeting;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-public class TripGroup {
+public class MeetingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +32,7 @@ public class TripGroup {
     private LocalDateTime createdAt; // 모임 생성일
     private LocalDateTime updatedAt; // 모임 수정일
 
-    public void setTripGroup(UpdateTripGroup.Request tripGroup) {
+    public void setTripGroup(UpdateMeeting.Request tripGroup) {
         this.meetingTitle = tripGroup.getMeetingTitle();
         this.description = tripGroup.getDescription();
         this.destination = tripGroup.getDestination();

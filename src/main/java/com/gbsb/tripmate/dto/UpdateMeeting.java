@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class UpdateTripGroup {
+public class UpdateMeeting {
     @Getter
     @Setter
     @AllArgsConstructor
