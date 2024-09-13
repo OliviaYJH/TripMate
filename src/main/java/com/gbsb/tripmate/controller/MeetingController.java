@@ -1,8 +1,11 @@
 package com.gbsb.tripmate.controller;
 
 import com.gbsb.tripmate.dto.BaseResponse;
-import com.gbsb.tripmate.dto.UpdateMeeting;
+import com.gbsb.tripmate.dto.MeetingCreateRequest;
+import com.gbsb.tripmate.entity.MeetingEntity;
+import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.service.MeetingService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -16,23 +19,26 @@ public class MeetingController {
         this.meetingService = meetingService;
     }
 
-    @PutMapping("/{groupId}")
-    BaseResponse<Boolean> updateTripGroup(
-            @PathVariable Long groupId,
-            @RequestBody UpdateMeeting.Request request
-    ) {
-        System.out.println("groupId " + groupId.toString());
-        meetingService.updateTripGroup(groupId, request);
-        return new BaseResponse<>("모임 수정 성공", true);
+    // 모임 생성
+    @PostMapping("/create")
+    public BaseResponse<Boolean> createGroup(@RequestBody MeetingCreateRequest request, @AuthenticationPrincipal User user) {
+        try {
+            MeetingEntity newMeeting = meetingService.createMeeting(user.getId(), request);
+            return new BaseResponse<>("모임이 개설되었습니다.", true);
+        } catch (Exception e) {
+            return new BaseResponse<>("모임 개설에 실패했습니다.", false);
+        }
+
     }
 
-    @PostMapping("/{groupId}/join")
-    BaseResponse<Boolean> joinTripGroup(
-            @PathVariable Long groupId,
-            @RequestParam Long memberId,
-            @RequestParam LocalDate travelStartDate,
-            @RequestParam LocalDate travelEndDate
-    ) {
-        return new BaseResponse<>("모임 참여 성공", true);
+    // 모임 삭제
+    @DeleteMapping("/{meetingId}")
+    public BaseResponse<Boolean> deleteMeeting(@PathVariable long meetingId, @AuthenticationPrincipal User user) {
+        try {
+            meetingService.deleteMeeting(user.getId(), meetingId);
+            return new BaseResponse<>("모임이 삭제되었습니다.", true);
+        } catch (Exception e) {
+            return new BaseResponse<>("모임 삭제에 실패했습니다.", false);
+        }
     }
 }

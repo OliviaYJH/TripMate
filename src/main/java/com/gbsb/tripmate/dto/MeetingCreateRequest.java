@@ -1,19 +1,19 @@
 package com.gbsb.tripmate.dto;
 
-import com.gbsb.tripmate.dto.constant.AgeRange;
-import com.gbsb.tripmate.dto.constant.Gender;
-import com.gbsb.tripmate.dto.constant.TravelStyle;
+import com.gbsb.tripmate.enums.AgeGroup;
+import com.gbsb.tripmate.enums.Gender;
+import com.gbsb.tripmate.enums.TravelStyle;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class GroupCreateRequest {
+public class MeetingCreateRequest {
     private String meetingTitle;
     private String description;
     private String destination;
     private Gender gender;
-    private AgeRange ageRange;
+    private AgeGroup ageGroup;
     private TravelStyle travelStyle;
     private LocalDate travelStartDate;
     private LocalDate travelEndDate;

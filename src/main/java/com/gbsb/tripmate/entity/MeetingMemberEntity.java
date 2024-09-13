@@ -9,16 +9,15 @@ import java.time.LocalDate;
 public class MeetingMemberEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long groupMemberId;
-
-    //    @ManyToOne
-//    @JoinColumn(name = "user_id", nullable = false)
-    // private User userId;
-    private Long userId; // 사용자 아이디
+    private Long meetingMemberId;
 
     @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    private MeetingEntity groupId; // 그룹 아이디
+    @JoinColumn(name = "user_id", nullable = false)
+    private User userId; // 사용자 아이디
+
+    @ManyToOne
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private MeetingEntity meetingId; // 그룹 아이디
 
     private LocalDate joinDate; // 모임 참여 일자
 

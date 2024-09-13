@@ -1,29 +1,42 @@
 package com.gbsb.tripmate.entity;
 
-import com.gbsb.tripmate.dto.UpdateMeeting;
+import com.gbsb.tripmate.enums.AgeGroup;
+import com.gbsb.tripmate.enums.Gender;
+import com.gbsb.tripmate.enums.TravelStyle;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "Meeting")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MeetingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long groupId; // 모임 id (PK)
+    private Long meetingId; // 모임 id (PK)
 
-//    @ManyToOne
-//    @JoinColumn(name = "group_leader_id", nullable = false)
-//    //private User groupLeader; // 모임장 id
-//    private String groupLeader;
+    @ManyToOne
+    @JoinColumn(name = "meeting_leader_id", nullable = false)
+    private User meetingLeader; // 모임장 id
 
     private String meetingTitle; // 모임 제목
     private String description; // 모임 설명
     private String destination; // 여행지
-    private String gender; // 성별 조건
-    private String ageRange; // 연령대 조건
-    private String travelStyle; // 여행 스타일
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender; // 성별 조건
+
+    @Enumerated(EnumType.STRING)
+    private AgeGroup ageGroup; // 연령대 조건
+
+    @Enumerated(EnumType.STRING)
+    private TravelStyle travelStyle; // 여행 스타일
 
     private LocalDate travelStartDate; // 여행 시작일
     private LocalDate travelEndDate; // 여행 종료일
@@ -32,15 +45,6 @@ public class MeetingEntity {
     private LocalDateTime createdAt; // 모임 생성일
     private LocalDateTime updatedAt; // 모임 수정일
 
-    public void setTripGroup(UpdateMeeting.Request tripGroup) {
-        this.meetingTitle = tripGroup.getMeetingTitle();
-        this.description = tripGroup.getDescription();
-        this.destination = tripGroup.getDestination();
-        this.gender = tripGroup.getGender();
-        this.ageRange = tripGroup.getAgeRange();
-        this.travelStyle = tripGroup.getTravelStyle();
-        this.memberMax = tripGroup.getMemberMax();
-        this.travelStartDate = tripGroup.getTravelStartDate();
-        this.travelEndDate = tripGroup.getTravelEndDate();
-    }
+    private Boolean isDeleted = false;
+
 }
