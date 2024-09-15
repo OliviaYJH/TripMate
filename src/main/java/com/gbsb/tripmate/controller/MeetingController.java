@@ -30,11 +30,4 @@ public class MeetingController {
         meetingService.joinMeeting(meetingId, request);
         return new BaseResponse<>("모임 참여 성공", true);
     }
-
-//    @GetMapping("/{userId}")
-//    Optional<UserEntity> getMember(
-//            @PathVariable Long userId
-//    ) {
-//        return meetingService.getMember(userId);
-//    }
 }

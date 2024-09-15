@@ -13,7 +13,6 @@ public class JoinMeeting {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Request {
-        private Long memberId;
         private LocalDate travelStartDate;
         private LocalDate travelEndDate;
     }

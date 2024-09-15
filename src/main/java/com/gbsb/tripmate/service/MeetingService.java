@@ -34,7 +34,6 @@ public class MeetingService {
     public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String userEmail = userDetails.getUsername();
-
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
 
@@ -61,13 +60,19 @@ public class MeetingService {
             Long meetingId,
             JoinMeeting.Request request
     ) {
-        // memberId로 회원 찾기
-        User user = userRepository.findById(request.getMemberId())
+        // 회원 찾기
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userEmail = userDetails.getUsername();
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
 
         // groupId로 참여할 모임 찾기
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+
+        // 내가 생성한 모임에는 참여 불가능
+        if (Objects.equals(user.getId(), meeting.getMeetingLeader().getId()))
+            throw new MeetingException(ErrorCode.CREATED_BY_USER);
 
         // 모임 멤버 테이블에 추가하기
         MeetingMember meetingMember
