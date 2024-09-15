@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 public class MeetingController {
     private final MeetingService meetingService;
 
-    @PutMapping("/{groupId}")
+    @PutMapping("/{meetingId}")
     BaseResponse<Boolean> updateMeeting(
-            @PathVariable Long groupId,
+            @PathVariable Long meetingId,
             @RequestBody UpdateMeeting.Request request
     ) {
-        meetingService.updateMeeting(groupId, request);
+        meetingService.updateMeeting(meetingId, request);
         return new BaseResponse<>("모임 수정 성공", true);
     }
 
@@ -26,7 +26,7 @@ public class MeetingController {
     BaseResponse<Boolean> joinMeeting(
             @PathVariable Long meetingId,
             @RequestBody JoinMeeting.Request request
-            ) {
+    ) {
         meetingService.joinMeeting(meetingId, request);
         return new BaseResponse<>("모임 참여 성공", true);
     }

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Transactional
@@ -30,10 +31,9 @@ public class MeetingService {
     private final MeetingMemberRepository meetingMemberRepository;
     private final DailyParticipationRepository dailyParticipationRepository;
 
-    public void updateMeeting(Long groupId, UpdateMeeting.Request request) {
-        validateUpdateMeeting(request);
+    public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
 
-        MeetingEntity meetingEntity = meetingRepository.findById(groupId)
+        MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
         if (request.getTravelStartDate().isAfter(request.getTravelEndDate())) {
@@ -85,6 +85,16 @@ public class MeetingService {
             throw new MeetingException(ErrorCode.INVALID_MEETING_TRAVEL_DATE);
         }
 
+        // 이미 어떠한 날에 참여하고 있는 경우 already joined
+        List<LocalDate> dailyParticipationEntities = dailyParticipationRepository.findParticipationDatesByUserId(userEntity.getUserId());
+        for (LocalDate date : dailyParticipationEntities) {
+            for (LocalDate travelDate = request.getTravelStartDate(); !travelDate.isAfter(request.getTravelEndDate()); date = date.plusDays(1)) {
+                if (date.equals(travelDate)) {
+                    throw new MeetingException(ErrorCode.ALREADY_JOINED_DATE);
+                }
+            }
+        }
+
         // 부분 참여 테이블에 추가하기(시작일부터 마지막날까지 하루씩 추가)
         for (LocalDate date = request.getTravelStartDate(); !date.isAfter(request.getTravelEndDate()); date = date.plusDays(1)) {
             DailyParticipationEntity dailyParticipationEntity
@@ -95,30 +105,4 @@ public class MeetingService {
             dailyParticipationRepository.save(dailyParticipationEntity);
         }
     }
-
-    private void validateUpdateMeeting(UpdateMeeting.Request request) {
-        // 하나라도 Null이면 error 처리
-        if (request.getMeetingTitle().isBlank() || request.getDescription().isBlank()
-                || request.getDestination().isBlank() || request.getGender() == null || request.getMemberMax() <= 1)
-            throw new MeetingException(ErrorCode.INVALID_INPUT);
-
-        // enum은 타입 맞는지 확인
-        if (!isValidGender(request.getGender()) || !isValidTravelStyle(request.getTravelStyle())
-                || !isValidAgeGroup(request.getAgeRange()))
-            throw new MeetingException(ErrorCode.INVALID_INPUT);
-    }
-
-    private boolean isValidGender(Gender gender) {
-        return (gender == Gender.MALE || gender == Gender.FEMALE || gender == Gender.OTHER);
-    }
-
-    private boolean isValidTravelStyle(TravelStyle travelStyle) {
-        return (travelStyle == TravelStyle.SHOPPING || travelStyle == TravelStyle.TOURISM || travelStyle == TravelStyle.HEALING || travelStyle == TravelStyle.EXPERIENCE);
-    }
-
-    private boolean isValidAgeGroup(AgeGroup ageGroup) {
-        return (ageGroup == AgeGroup.TEENS || ageGroup == AgeGroup.TWENTIES || ageGroup == AgeGroup.THIRTIES ||
-                ageGroup == AgeGroup.FORTIES || ageGroup == AgeGroup.FIFTIES || ageGroup == AgeGroup.SIXTIES_PLUS);
-    }
-
 }
