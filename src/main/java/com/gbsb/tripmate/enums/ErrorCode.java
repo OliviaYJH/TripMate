@@ -14,8 +14,8 @@ public enum ErrorCode {
     INVALID_MEETING_TRAVEL_DATE("참여하려는 모임의 여행 기간을 확인해주세요."),
     INVALID_TRAVEL_DATE("여행 기간이 알맞지 않습니다."),
     INVALID_INPUT("입력한 내용을 확인해주세요."),
-    ALREADY_JOINED_DATE("이미 참여한 여행 날짜입니다.")
-    ;
+    ALREADY_JOINED_DATE("이미 참여한 여행 날짜입니다."),
+    USER_AND_MEETING_UNMATCHED("해당 유저가 생성한 모임이 아닙니다.");
 
     private final String description;
 }

@@ -13,11 +13,14 @@ import com.gbsb.tripmate.repository.MeetingMemberRepository;
 import com.gbsb.tripmate.repository.MeetingRepository;
 import com.gbsb.tripmate.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -29,9 +32,18 @@ public class MeetingService {
     private final DailyParticipationRepository dailyParticipationRepository;
 
     public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userEmail = userDetails.getUsername();
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
 
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+
+        if (!Objects.equals(user.getId(), meeting.getMeetingLeader().getId())) {
+            throw new MeetingException(ErrorCode.USER_AND_MEETING_UNMATCHED);
+        }
 
         if (request.getTravelStartDate().isAfter(request.getTravelEndDate())) {
             throw new MeetingException(ErrorCode.INVALID_TRAVEL_DATE);
@@ -83,7 +95,7 @@ public class MeetingService {
         }
 
         // 이미 어떠한 날에 참여하고 있는 경우 already joined
-        List<LocalDate> dailyParticipationEntities = dailyParticipationRepository.findParticipationDatesByUserId(user.getUserId());
+        List<LocalDate> dailyParticipationEntities = dailyParticipationRepository.findParticipationDatesById(user.getId());
         for (LocalDate date : dailyParticipationEntities) {
             for (LocalDate travelDate = request.getTravelStartDate(); !travelDate.isAfter(request.getTravelEndDate()); date = date.plusDays(1)) {
                 if (date.equals(travelDate)) {
