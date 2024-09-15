@@ -14,14 +14,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DailyParticipationEntity {
+public class DailyParticipation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dailyParticipationId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserEntity userEntity;
+    private User user;
 
     @Column(nullable = false)
     private LocalDate participationDate;

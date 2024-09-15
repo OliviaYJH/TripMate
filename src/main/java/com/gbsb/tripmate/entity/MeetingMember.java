@@ -14,18 +14,18 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeetingMemberEntity {
+public class MeetingMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long meetingMemberId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
-    private UserEntity userEntity;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "meeting_id", referencedColumnName = "meetingId")
-    private MeetingEntity meetingEntity;
+    private Meeting meeting;
 
     @Column(nullable = false)
     private LocalDate joinDate;

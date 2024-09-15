@@ -2,14 +2,11 @@ package com.gbsb.tripmate.service;
 
 import com.gbsb.tripmate.dto.JoinMeeting;
 import com.gbsb.tripmate.dto.UpdateMeeting;
-import com.gbsb.tripmate.entity.DailyParticipationEntity;
-import com.gbsb.tripmate.entity.MeetingEntity;
-import com.gbsb.tripmate.entity.MeetingMemberEntity;
-import com.gbsb.tripmate.entity.UserEntity;
-import com.gbsb.tripmate.enums.AgeGroup;
+import com.gbsb.tripmate.entity.DailyParticipation;
+import com.gbsb.tripmate.entity.Meeting;
+import com.gbsb.tripmate.entity.MeetingMember;
+import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.enums.ErrorCode;
-import com.gbsb.tripmate.enums.Gender;
-import com.gbsb.tripmate.enums.TravelStyle;
 import com.gbsb.tripmate.exception.MeetingException;
 import com.gbsb.tripmate.repository.DailyParticipationRepository;
 import com.gbsb.tripmate.repository.MeetingMemberRepository;
@@ -33,7 +30,7 @@ public class MeetingService {
 
     public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
 
-        MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
         if (request.getTravelStartDate().isAfter(request.getTravelEndDate())) {
@@ -44,8 +41,8 @@ public class MeetingService {
             throw new MeetingException(ErrorCode.INVALID_MEETING_TRAVEL_START_DATE);
         }
 
-        meetingEntity.setTripGroup(request);
-        meetingRepository.save(meetingEntity);
+        meeting.setTripGroup(request);
+        meetingRepository.save(meeting);
     }
 
     public void joinMeeting(
@@ -53,40 +50,40 @@ public class MeetingService {
             JoinMeeting.Request request
     ) {
         // memberId로 회원 찾기
-        UserEntity userEntity = userRepository.findById(request.getMemberId())
+        User user = userRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
 
         // groupId로 참여할 모임 찾기
-        MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
         // 모임 멤버 테이블에 추가하기
-        MeetingMemberEntity meetingMemberEntity
-                = MeetingMemberEntity.builder()
-                .userEntity(userEntity)
-                .meetingEntity(meetingEntity)
+        MeetingMember meetingMember
+                = MeetingMember.builder()
+                .user(user)
+                .meeting(meeting)
                 .joinDate(LocalDate.now())
                 .isLeader(false)
                 // 기본값은 false이고 모임을 생성할 때 모임 테이블과 모임멤버 테이블에 데이터 넣을 때 true로 하기
                 .build();
-        meetingMemberRepository.save(meetingMemberEntity);
+        meetingMemberRepository.save(meetingMember);
 
         if (request.getTravelStartDate().isAfter(request.getTravelEndDate())) {
             throw new MeetingException(ErrorCode.INVALID_TRAVEL_DATE);
         }
 
-        if (request.getTravelStartDate().isBefore(meetingEntity.getTravelStartDate()) ||
-                request.getTravelStartDate().isAfter(meetingEntity.getTravelEndDate())) {
+        if (request.getTravelStartDate().isBefore(meeting.getTravelStartDate()) ||
+                request.getTravelStartDate().isAfter(meeting.getTravelEndDate())) {
             throw new MeetingException(ErrorCode.INVALID_MEETING_TRAVEL_DATE);
         }
 
-        if (request.getTravelEndDate().isBefore(meetingEntity.getTravelStartDate()) ||
-                request.getTravelEndDate().isAfter(meetingEntity.getTravelEndDate())) {
+        if (request.getTravelEndDate().isBefore(meeting.getTravelStartDate()) ||
+                request.getTravelEndDate().isAfter(meeting.getTravelEndDate())) {
             throw new MeetingException(ErrorCode.INVALID_MEETING_TRAVEL_DATE);
         }
 
         // 이미 어떠한 날에 참여하고 있는 경우 already joined
-        List<LocalDate> dailyParticipationEntities = dailyParticipationRepository.findParticipationDatesByUserId(userEntity.getUserId());
+        List<LocalDate> dailyParticipationEntities = dailyParticipationRepository.findParticipationDatesByUserId(user.getUserId());
         for (LocalDate date : dailyParticipationEntities) {
             for (LocalDate travelDate = request.getTravelStartDate(); !travelDate.isAfter(request.getTravelEndDate()); date = date.plusDays(1)) {
                 if (date.equals(travelDate)) {
@@ -97,12 +94,12 @@ public class MeetingService {
 
         // 부분 참여 테이블에 추가하기(시작일부터 마지막날까지 하루씩 추가)
         for (LocalDate date = request.getTravelStartDate(); !date.isAfter(request.getTravelEndDate()); date = date.plusDays(1)) {
-            DailyParticipationEntity dailyParticipationEntity
-                    = DailyParticipationEntity.builder()
-                    .userEntity(userEntity)
+            DailyParticipation dailyParticipation
+                    = DailyParticipation.builder()
+                    .user(user)
                     .participationDate(date)
                     .build();
-            dailyParticipationRepository.save(dailyParticipationEntity);
+            dailyParticipationRepository.save(dailyParticipation);
         }
     }
 }

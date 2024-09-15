@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeetingEntity {
+public class Meeting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class MeetingEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserEntity meetingLeader;
+    private User meetingLeader;
 
     @Column(nullable = false)
     private String meetingTitle;
