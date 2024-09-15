@@ -20,7 +20,7 @@ public class DailyParticipation {
     private Long dailyParticipationId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "id")
     private User user;
 
     @Column(nullable = false)

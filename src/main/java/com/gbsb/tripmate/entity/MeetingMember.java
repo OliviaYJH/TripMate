@@ -20,7 +20,7 @@ public class MeetingMember {
     private Long meetingMemberId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "userId")
+    @JoinColumn(name = "id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne

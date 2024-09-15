@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface DailyParticipationRepository extends JpaRepository<DailyParticipation, Long> {
-    @Query("SELECT dp.participationDate FROM DailyParticipation dp WHERE dp.user.userId = :userId")
+    @Query("SELECT dp.participationDate FROM DailyParticipation dp WHERE dp.user.id = :id")
     List<LocalDate> findParticipationDatesByUserId(Long userId);
 }
