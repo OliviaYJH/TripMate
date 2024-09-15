@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -70,3 +70,4 @@ public class User {
         else return AgeGroup.SIXTIES_PLUS;
     }
 }
+
