@@ -1,7 +1,7 @@
-package Enum;
+package enums;
 
 public enum GenderCondition {
     MALE_ONLY,
     FEMALE_ONLY,
-    ANY
+    ALL_GENDERS
 }

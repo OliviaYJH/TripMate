@@ -2,12 +2,11 @@ package entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import Enum.*;
+import enums.*;
 
 @Entity
 @Getter
@@ -28,7 +27,7 @@ public class User {
     private String userPassword;
 
     @Column
-    private String userNickName;
+    private String userNickname;
 
     @Column
     @Enumerated(EnumType.STRING)

@@ -1,4 +1,4 @@
-package Enum;
+package enums;
 
 public enum AgeRange {
     TEEN,
@@ -6,5 +6,5 @@ public enum AgeRange {
     THIRTIES,
     FORTIES,
     FIFTIES,
-    ANY
+    SIXTIES_PLUS
 }

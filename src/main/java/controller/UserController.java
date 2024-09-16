@@ -1,4 +1,4 @@
-package contoller;
+package controller;
 
 import dto.UpdateUserProfileRequest;
 import entity.Meeting;
@@ -16,14 +16,8 @@ import service.UserService;
 @RequestMapping("/api/user")
 public class UserController {
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     private final UserService userService;
 
-
-    // 사용자 정보 조회 (D-day 포함)
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserInfo(@PathVariable Long userId) {
         return userService.getUserInfo(userId)
@@ -31,13 +25,11 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 프로필 업데이트
     @PutMapping("/{userId}")
     public ResponseEntity<User> updateUserProfile(@PathVariable Long userId, @RequestBody UpdateUserProfileRequest dto) {
         return ResponseEntity.ok(userService.updateUserProfile(userId, dto));
     }
 
-    // 사용자 모임 목록 조회 (페이지네이션 적용)
     @GetMapping("/{userId}/meetings")
     public ResponseEntity<Page<Meeting>> getMeetingsByUserId(@PathVariable Long userId,
                                                              @RequestParam(defaultValue = "0") int page,
@@ -47,4 +39,3 @@ public class UserController {
         return ResponseEntity.ok(meetings);
     }
 }
-
