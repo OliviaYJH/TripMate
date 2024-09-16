@@ -1,10 +1,10 @@
 package com.gbsb.tripmate.repository;
 
-import com.gbsb.tripmate.entity.MeetingEntity;
+import com.gbsb.tripmate.entity.Meeting;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MeetingRepository extends JpaRepository<MeetingEntity, Long> {
+public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
 }

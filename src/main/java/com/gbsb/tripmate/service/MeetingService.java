@@ -1,8 +1,9 @@
 package com.gbsb.tripmate.service;
 
 import com.gbsb.tripmate.dto.MeetingCreateRequest;
+import com.gbsb.tripmate.entity.MeetingMember;
 import com.gbsb.tripmate.entity.User;
-import com.gbsb.tripmate.entity.MeetingEntity;
+import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.repository.MeetingMemberRepository;
 import com.gbsb.tripmate.repository.MeetingRepository;
 import com.gbsb.tripmate.repository.UserRepository;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -24,30 +24,39 @@ public class MeetingService {
     private final MeetingMemberRepository meetingMemberRepository;
 
     // 모임 생성
-    public MeetingEntity createMeeting(Long id, MeetingCreateRequest request) {
+    public Meeting createMeeting(Long id, MeetingCreateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
-        MeetingEntity meeting = MeetingEntity.builder()
+        Meeting meeting = Meeting.builder()
                 .meetingLeader(user)
                 .meetingTitle(request.getMeetingTitle())
-                .description(request.getDescription())
+                .meetingDescription(request.getDescription())
                 .destination(request.getDestination())
-                .gender(request.getGender())
-                .ageGroup(request.getAgeGroup())
+                .genderCondition(request.getGender())
+                .ageRange(request.getAgeGroup())
                 .travelStyle(request.getTravelStyle())
                 .travelStartDate(request.getTravelStartDate())
                 .travelEndDate(request.getTravelEndDate())
                 .memberMax(request.getMemberMax())
-                .createdAt(LocalDateTime.now())
+                .createdDate(LocalDate.now())
                 .build();
 
+        // 모임장을 모임 멤버에 추가
+        MeetingMember leader = MeetingMember.builder()
+                .meeting(meeting)
+                .user(user)
+                .isLeader(true)
+                .joinDate(LocalDate.now())
+                .build();
+
+        meetingMemberRepository.save(leader);
         return meetingRepository.save(meeting);
     }
 
     // 모임 삭제
     public void deleteMeeting(Long id, Long meetingId) {
-        MeetingEntity meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new ResourceNotFoundException("모임을 찾을 수 없습니다."));
 
         if (!meeting.getMeetingLeader().getId().equals(id)) {
@@ -62,7 +71,7 @@ public class MeetingService {
         }
 
         // 여행 기간 중 삭제 제한
-        if (meeting.getTravelEndDate().isAfter(LocalDate.now())) {
+        if (!LocalDate.now().isBefore(meeting.getTravelStartDate()) && !LocalDate.now().isAfter(meeting.getTravelEndDate())) {
             throw new RuntimeException("여행기간 중에는 모임을 삭제할 수 없습니다.");
         }
 

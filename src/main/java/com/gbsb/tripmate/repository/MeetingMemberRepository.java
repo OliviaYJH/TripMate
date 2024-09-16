@@ -1,20 +1,16 @@
 package com.gbsb.tripmate.repository;
 
-import com.gbsb.tripmate.entity.GroupMember;
+import com.gbsb.tripmate.entity.MeetingMember;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface MeetingMemberRepository extends JpaRepository<GroupMember, Long> {
+public interface MeetingMemberRepository extends JpaRepository<MeetingMember, Long> {
 
     // 멤버 수 조회
-    @Query("SELECT COUNT(gm) FROM GroupMember gm WHERE gm.group.groupId = :groupId")
-    int countMembersByGroupId(@Param("groupId") Long groupId);
+    @Query("SELECT COUNT(mm) FROM MeetingMember mm WHERE mm.meeting.meetingId = :meetingId")
+    int countMembersByGroupId(@Param("meetingId") Long meetingId);
 
-    // 모임에 참여한 모든 멤버 조회
-    List<GroupMember> findByGroup_GroupId(Long groupId);
 }
