@@ -4,33 +4,25 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "meeting_member")
+@Table(name = "daily_participation")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeetingMember {
+public class DailyParticipation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long meetingMemberId;
+    private Long dailyParticipationId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "meeting_id", referencedColumnName = "meetingId")
-    private Meeting meeting;
-
     @Column(nullable = false)
-    private LocalDate joinDate;
-
-    private Boolean isLeader;
+    private LocalDate participationDate;
 }
