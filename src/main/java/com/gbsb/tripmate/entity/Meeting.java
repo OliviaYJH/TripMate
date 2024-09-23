@@ -22,7 +22,7 @@ public class Meeting {
     private Long meetingId;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "meeting_leader_id", nullable = false)
     private User meetingLeader;
 
     @Column(nullable = false)
@@ -37,7 +37,7 @@ public class Meeting {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private AgeGroup ageRange;
+    private AgeGroup ageGroup;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -61,6 +61,8 @@ public class Meeting {
     @Column
     private LocalDate travelEndDate;
 
+    private Boolean isDeleted = false;
+  
     public void setTripGroup(UpdateMeeting.Request tripGroup) {
         this.meetingTitle = tripGroup.getMeetingTitle();
         this.meetingDescription = tripGroup.getDescription();
