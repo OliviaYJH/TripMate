@@ -37,14 +37,20 @@ public class PlaceService {
         this.placeRepository = placeRepository;
     }
 
-    public List<Place> getPlaceWithKeywordFromApi(String placeName, int page, int size) {
+    public List<Place> getPlaceWithKeywordFromApi(String placeName) {
         // 장소 검색 api
-        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, page, size);
-        parsePlaceWithKeyword(placeDataWithKeyword);
+        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, 1, 15);
+        SearchPlaceResponse searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, 1);
+        while (!searchPlaceResponse.isEnd()) {
+            if (searchPlaceResponse.getPage() >= 1 && searchPlaceResponse.getPage() <= 45) {
+                placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceResponse.getPage() + 1, 15);
+                searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceResponse.getPage() + 1);
+            }
+        }
         return placeRepository.findAllByPlaceNameContaining(placeName);
     }
 
-    private SearchPlaceResponse parsePlaceWithKeyword(String jsonString) {
+    private SearchPlaceResponse parsePlaceWithKeyword(String jsonString, int page) {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
 
@@ -94,7 +100,7 @@ public class PlaceService {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
         }
 
-        return new SearchPlaceResponse(places, totalCount, pageableCount, isEnd);
+        return new SearchPlaceResponse(places, page, isEnd);
     }
 
     private String getPlaceWithKeywordData(String placeName, int page, int size) {

@@ -10,14 +10,12 @@ import java.util.List;
 @Setter
 public class SearchPlaceResponse {
     private List<Place> places;
-    private Long totalCount;
-    private Long pageableCount;
+    private int page;
     private boolean isEnd;
 
-    public SearchPlaceResponse(List<Place> places, Long totalCount, Long pageableCount, boolean isEnd) {
+    public SearchPlaceResponse(List<Place> places, int page, boolean isEnd) {
         this.places = places;
-        this.totalCount = totalCount;
-        this.pageableCount = pageableCount;
+        this.page = page;
         this.isEnd = isEnd;
     }
 }

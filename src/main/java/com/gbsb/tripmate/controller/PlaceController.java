@@ -25,11 +25,9 @@ public class PlaceController {
 
     @GetMapping("/places")
     BaseResponse<List<Place>> searchPlace(
-            @RequestParam String placeName,
-            @RequestParam int page,
-            @RequestParam int size
+            @RequestParam String placeName
     ) {
-        List<Place> placeList = placeService.getPlaceWithKeywordFromApi(placeName, page, size);
+        List<Place> placeList = placeService.getPlaceWithKeywordFromApi(placeName);
         return new BaseResponse<>("장소 검색 성공", placeList);
     }
 
