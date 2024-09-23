@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Long> {
     List<Place> findAllByPlaceNameContaining(String placeName);
+    List<Place> findAllByAddressNameContaining(String placeName);
+    List<Place> findAllByRoadAddressNameContaining(String placeName);
 }

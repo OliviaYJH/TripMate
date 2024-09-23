@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,23 +32,41 @@ import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
 public class PlaceService {
     @Value("${kakaomap.key}")
     private String apiKey;
+
     private final PlaceRepository placeRepository;
 
     public PlaceService(PlaceRepository placeRepository) {
         this.placeRepository = placeRepository;
     }
 
-    public List<Place> getPlaceWithKeywordFromApi(String placeName) {
+    public List<Place> searchPlace(String placeName) {
         // 장소 검색 api
-        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, 1, 15);
-        SearchPlaceResponse searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, 1);
-        while (!searchPlaceResponse.isEnd()) {
-            if (searchPlaceResponse.getPage() >= 1 && searchPlaceResponse.getPage() <= 45) {
-                placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceResponse.getPage() + 1, 15);
-                searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceResponse.getPage() + 1);
-            }
-        }
-        return placeRepository.findAllByPlaceNameContaining(placeName);
+        getPlaceWithCategoryFromApi(placeName);
+
+        List<Place> placeList = new ArrayList<>();
+        placeList.addAll(placeRepository.findAllByPlaceNameContaining(placeName));
+        placeList.addAll(placeRepository.findAllByAddressNameContaining(placeName));
+        placeList.addAll(placeRepository.findAllByRoadAddressNameContaining(placeName));
+        return placeList;
+    }
+
+    private void getPlaceWithCategoryFromApi(String placeName) {
+        String placeDataWithKeyword = "";
+        SearchPlaceResponse searchPlaceResponse = new SearchPlaceResponse(Collections.emptyList(), 1, true);
+        do {
+            placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceResponse.getPage() + 1);
+            searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceResponse.getPage() + 1);
+        } while (!searchPlaceResponse.isEnd() && searchPlaceResponse.getPage() >= 1 && searchPlaceResponse.getPage() <= 45);
+
+
+//        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, 1);
+//        SearchPlaceResponse searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, 1);
+//        while (!searchPlaceResponse.isEnd()) {
+//            if (searchPlaceResponse.getPage() >= 1 && searchPlaceResponse.getPage() <= 45) {
+//                placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceResponse.getPage() + 1);
+//                searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceResponse.getPage() + 1);
+//            }
+//        }
     }
 
     private SearchPlaceResponse parsePlaceWithKeyword(String jsonString, int page) {
@@ -61,8 +80,6 @@ public class PlaceService {
         }
 
         JSONObject meta = (JSONObject) jsonObject.get("meta");
-        Long totalCount = (Long) meta.get("total_count");
-        Long pageableCount = (Long) meta.get("pageable_count");
         boolean isEnd = (Boolean) meta.get("is_end");
 
         JSONArray documents = (JSONArray) jsonObject.get("documents");
@@ -94,7 +111,7 @@ public class PlaceService {
                             .y(new BigDecimal(latitude))
                             .build();
                     placeRepository.save(place);
-                } else System.out.println("findPlace = " + findPlace.get().getPlaceName());
+                }
             }
         } else {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
@@ -103,14 +120,13 @@ public class PlaceService {
         return new SearchPlaceResponse(places, page, isEnd);
     }
 
-    private String getPlaceWithKeywordData(String placeName, int page, int size) {
+    private String getPlaceWithKeywordData(String placeName, int page) {
         // 키워드로 장소 검색하기 api
         try {
             String apiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query="
                     + URLEncoder.encode(placeName, "UTF-8")
                     + "&page=" + page
-                    + "&size=" + size;
-            // 페이징 처
+                    + "&size=" + 15;
             return getData(apiUrl);
 
         } catch (UnsupportedEncodingException e) {
