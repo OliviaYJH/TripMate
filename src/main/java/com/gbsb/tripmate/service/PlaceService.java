@@ -3,7 +3,6 @@ package com.gbsb.tripmate.service;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
-import jakarta.json.JsonObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,8 +18,8 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
 
@@ -30,9 +29,15 @@ public class PlaceService {
     @Value("${kakaomap.key}")
     private String apiKey;
 
-    public Place getPlaceFromApi(String address) {
-        String placeData = getPlaceData(address);
-        return parsePlace(placeData);
+//    public Place getPlaceFromApi(String address) {
+//        String placeData = getPlaceData(address);
+//        return parsePlace(placeData);
+//    }
+
+    public List<Place> getPlaceWithKeywordFromApi(String placeName, BigDecimal x, BigDecimal y) {
+        // 장소 검색 api
+        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, x, y);
+        return parsePlaceWithKeyword(placeDataWithKeyword);
     }
 
     private Place parsePlace(String jsonString) {
@@ -68,14 +73,73 @@ public class PlaceService {
         }
     }
 
-    private String getPlaceData(String address) {
-        String apiUrl = null; // 주소 검색하기 api
+    private List<Place> parsePlaceWithKeyword(String jsonString) {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject;
+
         try {
-            apiUrl = "https://dapi.kakao.com/v2/local/search/address?query=" + URLEncoder.encode(address, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+            jsonObject = (JSONObject) jsonParser.parse(jsonString);
+        } catch (ParseException e) {
             throw new MeetingException(FAIL_ENCODING);
         }
 
+        JSONArray documents = (JSONArray) jsonObject.get("documents");
+        List<Place> places = new ArrayList<>();
+
+        if (documents != null && !documents.isEmpty()) {
+            for (Object docObj : documents) {
+                JSONObject document = (JSONObject) docObj;
+
+                String addressName = (String) document.get("address_name");
+                String roadAddressName = (String) document.get("road_address_name");
+                String placeName = (String) document.get("place_name");
+                String phone = (String) document.get("phone");
+                String placeUrl = (String) document.get("place_url");
+                String latitude = (String) document.get("y");
+                String longitude = (String) document.get("x");
+
+                Place place = Place.builder()
+                        .addressName(addressName)
+                        .roadAddressName(roadAddressName)
+                        .placeName(placeName)
+                        .phone(phone)
+                        .placeUrl(placeUrl)
+                        .x(new BigDecimal(longitude))
+                        .y(new BigDecimal(latitude))
+                        .build();
+
+                places.add(place);
+            }
+        } else {
+            throw new MeetingException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        return places;
+    }
+
+    private String getPlaceData(String address) {
+        // 주소 검색하기 api
+        try {
+            String apiUrl = "https://dapi.kakao.com/v2/local/search/address?query=" + URLEncoder.encode(address, "UTF-8");
+            return getData(apiUrl);
+        } catch (UnsupportedEncodingException e) {
+            throw new MeetingException(FAIL_ENCODING);
+        }
+    }
+
+    private String getPlaceWithKeywordData(String placeName, BigDecimal x, BigDecimal y) {
+        // 키워드로 장소 검색하기 api
+        try {
+            String apiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query=" + URLEncoder.encode(placeName, "UTF-8")
+             + "&x=" + x + "&y=" + y + "&radius=10000";
+            return getData(apiUrl);
+
+        } catch (UnsupportedEncodingException e) {
+            throw new MeetingException(FAIL_ENCODING);
+        }
+    }
+
+    private String getData(String apiUrl) {
         try {
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -101,6 +165,5 @@ public class PlaceService {
         } catch (Exception e) {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
         }
-
     }
 }

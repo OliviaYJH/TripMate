@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.util.List;
 
 import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
 
@@ -21,11 +23,12 @@ public class PlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/places")
-    BaseResponse<Place> searchPlace(
-            @RequestParam String address
+    BaseResponse<List<Place>> searchPlace(
+            @RequestParam String placeName,
+            @RequestParam BigDecimal x,
+            @RequestParam BigDecimal y
     ) {
-        Place place = null;
-        place = placeService.getPlaceFromApi(address);
+        List<Place> place = placeService.getPlaceWithKeywordFromApi(placeName, x, y);
         return new BaseResponse<>("장소 검색 성공", place);
     }
 

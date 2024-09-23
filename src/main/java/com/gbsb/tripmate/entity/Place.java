@@ -22,6 +22,12 @@ public class Place {
 
     private String roadAddressName; // 도로명 주소
 
+    private String placeName;
+
+    private String phone;
+
+    private String placeUrl;
+
     private BigDecimal x;
 
     private BigDecimal y;
