@@ -17,10 +17,6 @@ import lombok.RequiredArgsConstructor;
 public class MeetingController {
     private final MeetingService meetingService;
 
-    public MeetingController(MeetingService meetingService) {
-        this.meetingService = meetingService;
-    }
-
     // 모임 생성
     @PostMapping("/create")
     public BaseResponse<Boolean> createGroup(@RequestBody MeetingCreateRequest request, @AuthenticationPrincipal User user) {
@@ -62,5 +58,6 @@ public class MeetingController {
         } catch (Exception e) {
             e.printStackTrace();
             return new BaseResponse<>("모임 삭제에 실패했습니다.", false);
-        }  
+        }
+    }
 }

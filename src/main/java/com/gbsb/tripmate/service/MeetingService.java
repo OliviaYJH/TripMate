@@ -90,6 +90,7 @@ public class MeetingService {
 
         meeting.setIsDeleted(true);
         meetingRepository.save(meeting);
+    }
 
     public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
