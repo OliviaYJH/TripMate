@@ -34,7 +34,7 @@ public class MeetingService {
                 .meetingDescription(request.getDescription())
                 .destination(request.getDestination())
                 .genderCondition(request.getGender())
-                .ageRange(request.getAgeGroup())
+                .ageGroup(request.getAgeGroup())
                 .travelStyle(request.getTravelStyle())
                 .travelStartDate(request.getTravelStartDate())
                 .travelEndDate(request.getTravelEndDate())
@@ -42,16 +42,18 @@ public class MeetingService {
                 .createdDate(LocalDate.now())
                 .build();
 
+        Meeting savedMeeting = meetingRepository.save(meeting);
+
         // 모임장을 모임 멤버에 추가
         MeetingMember leader = MeetingMember.builder()
-                .meeting(meeting)
+                .meeting(savedMeeting)
                 .user(user)
                 .isLeader(true)
                 .joinDate(LocalDate.now())
                 .build();
 
         meetingMemberRepository.save(leader);
-        return meetingRepository.save(meeting);
+        return savedMeeting;
     }
 
     // 모임 삭제

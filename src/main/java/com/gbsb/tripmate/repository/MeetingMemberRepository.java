@@ -12,5 +12,4 @@ public interface MeetingMemberRepository extends JpaRepository<MeetingMember, Lo
     // 멤버 수 조회
     @Query("SELECT COUNT(mm) FROM MeetingMember mm WHERE mm.meeting.meetingId = :meetingId")
     int countMembersByGroupId(@Param("meetingId") Long meetingId);
-
 }
