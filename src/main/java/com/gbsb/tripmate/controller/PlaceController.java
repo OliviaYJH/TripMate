@@ -1,6 +1,7 @@
 package com.gbsb.tripmate.controller;
 
 import com.gbsb.tripmate.dto.BaseResponse;
+import com.gbsb.tripmate.dto.PlacePageResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.service.PlaceService;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,12 @@ public class PlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/places")
-    BaseResponse<List<Place>> searchPlace(
-            @RequestParam String placeName
+    BaseResponse<PlacePageResponse> searchPlace(
+            @RequestParam String placeName,
+            @RequestParam int page,
+            @RequestParam int size
     ) {
-        List<Place> placeList = placeService.searchPlace(placeName);
+        PlacePageResponse placeList = placeService.searchPlace(placeName, page, size);
         return new BaseResponse<>("장소 검색 성공", placeList);
     }
 

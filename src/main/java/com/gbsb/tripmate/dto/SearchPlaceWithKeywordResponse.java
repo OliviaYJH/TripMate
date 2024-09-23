@@ -8,12 +8,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SearchPlaceResponse {
+public class SearchPlaceWithKeywordResponse {
     private List<Place> places;
     private int page;
     private boolean isEnd;
 
-    public SearchPlaceResponse(List<Place> places, int page, boolean isEnd) {
+    public SearchPlaceWithKeywordResponse(List<Place> places, int page, boolean isEnd) {
         this.places = places;
         this.page = page;
         this.isEnd = isEnd;

@@ -1,6 +1,7 @@
 package com.gbsb.tripmate.service;
 
-import com.gbsb.tripmate.dto.SearchPlaceResponse;
+import com.gbsb.tripmate.dto.PlacePageResponse;
+import com.gbsb.tripmate.dto.SearchPlaceWithKeywordResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
@@ -10,9 +11,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -24,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
 
 @Service
@@ -39,37 +41,34 @@ public class PlaceService {
         this.placeRepository = placeRepository;
     }
 
-    public List<Place> searchPlace(String placeName) {
+    public PlacePageResponse searchPlace(String placeName, int page, int size) {
         // 장소 검색 api
         getPlaceWithCategoryFromApi(placeName);
 
-        List<Place> placeList = new ArrayList<>();
-        placeList.addAll(placeRepository.findAllByPlaceNameContaining(placeName));
-        placeList.addAll(placeRepository.findAllByAddressNameContaining(placeName));
-        placeList.addAll(placeRepository.findAllByRoadAddressNameContaining(placeName));
-        return placeList;
+        Pageable pageable = PageRequest.of(page -1, size);
+        Page<Place> placePage = placeRepository.findAllByPlaceNameContainingOrAddressNameContainingOrRoadAddressNameContaining(
+                placeName, placeName, placeName, pageable
+        );
+
+        List<Place> places = placePage.getContent();
+        int currentPage = placePage.getNumber() + 1;
+        int totalPages = placePage.getTotalPages();
+        long totalElements = placePage.getTotalElements();
+        boolean hasNext = placePage.hasNext();
+
+        return new PlacePageResponse(places, currentPage, totalPages, totalElements, hasNext);
     }
 
     private void getPlaceWithCategoryFromApi(String placeName) {
         String placeDataWithKeyword = "";
-        SearchPlaceResponse searchPlaceResponse = new SearchPlaceResponse(Collections.emptyList(), 1, true);
+        SearchPlaceWithKeywordResponse searchPlaceWithKeywordResponse = new SearchPlaceWithKeywordResponse(Collections.emptyList(), 1, true);
         do {
-            placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceResponse.getPage() + 1);
-            searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceResponse.getPage() + 1);
-        } while (!searchPlaceResponse.isEnd() && searchPlaceResponse.getPage() >= 1 && searchPlaceResponse.getPage() <= 45);
-
-
-//        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, 1);
-//        SearchPlaceResponse searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, 1);
-//        while (!searchPlaceResponse.isEnd()) {
-//            if (searchPlaceResponse.getPage() >= 1 && searchPlaceResponse.getPage() <= 45) {
-//                placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceResponse.getPage() + 1);
-//                searchPlaceResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceResponse.getPage() + 1);
-//            }
-//        }
+            placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceWithKeywordResponse.getPage() + 1);
+            searchPlaceWithKeywordResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceWithKeywordResponse.getPage() + 1);
+        } while (!searchPlaceWithKeywordResponse.isEnd() && searchPlaceWithKeywordResponse.getPage() >= 1 && searchPlaceWithKeywordResponse.getPage() <= 45);
     }
 
-    private SearchPlaceResponse parsePlaceWithKeyword(String jsonString, int page) {
+    private SearchPlaceWithKeywordResponse parsePlaceWithKeyword(String jsonString, int page) {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
 
@@ -117,7 +116,7 @@ public class PlaceService {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
         }
 
-        return new SearchPlaceResponse(places, page, isEnd);
+        return new SearchPlaceWithKeywordResponse(places, page, isEnd);
     }
 
     private String getPlaceWithKeywordData(String placeName, int page) {
