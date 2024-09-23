@@ -4,6 +4,7 @@ import com.gbsb.tripmate.dto.SearchPlaceResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
+import com.gbsb.tripmate.repository.PlaceRepository;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -21,6 +22,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
 
@@ -29,49 +31,17 @@ import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
 public class PlaceService {
     @Value("${kakaomap.key}")
     private String apiKey;
+    private final PlaceRepository placeRepository;
 
-//    public Place getPlaceFromApi(String address) {
-//        String placeData = getPlaceData(address);
-//        return parsePlace(placeData);
-//    }
-
-    public SearchPlaceResponse getPlaceWithKeywordFromApi(String placeName, int page, int size) {
-        // 장소 검색 api
-        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, page, size);
-        return parsePlaceWithKeyword(placeDataWithKeyword);
+    public PlaceService(PlaceRepository placeRepository) {
+        this.placeRepository = placeRepository;
     }
 
-    private Place parsePlace(String jsonString) {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject;
-
-        try {
-            jsonObject = (JSONObject) jsonParser.parse(jsonString);
-        } catch (ParseException e) {
-            throw new MeetingException(FAIL_ENCODING);
-        }
-
-        JSONArray documents = (JSONArray) jsonObject.get("documents");
-        if (documents != null && !documents.isEmpty()) {
-            JSONObject firstDocument = (JSONObject) documents.get(0);
-
-            String addressName = (String) firstDocument.get("address_name");
-            JSONObject roadAddress = (JSONObject) firstDocument.get("road_address");
-            String roadAddressName = (String) roadAddress.get("address_name");
-            String latitude = (String) firstDocument.get("y");
-            String longitude = (String) firstDocument.get("x");
-
-            Place place = Place.builder()
-                    .addressName(addressName)
-                    .roadAddressName(roadAddressName)
-                    .x(new BigDecimal(latitude))
-                    .y(new BigDecimal(longitude))
-                    .build();
-
-            return place;
-        } else {
-            throw new MeetingException(ErrorCode.INVALID_ADDRESS);
-        }
+    public List<Place> getPlaceWithKeywordFromApi(String placeName, int page, int size) {
+        // 장소 검색 api
+        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, page, size);
+        parsePlaceWithKeyword(placeDataWithKeyword);
+        return placeRepository.findAllByPlaceNameContaining(placeName);
     }
 
     private SearchPlaceResponse parsePlaceWithKeyword(String jsonString) {
@@ -105,34 +75,26 @@ public class PlaceService {
                 String latitude = (String) document.get("y");
                 String longitude = (String) document.get("x");
 
-                Place place = Place.builder()
-                        .placeId(Long.parseLong(placeId))
-                        .addressName(addressName)
-                        .roadAddressName(roadAddressName)
-                        .placeName(placeName)
-                        .phone(phone)
-                        .placeUrl(placeUrl)
-                        .x(new BigDecimal(longitude))
-                        .y(new BigDecimal(latitude))
-                        .build();
-
-                places.add(place);
+                Optional<Place> findPlace = placeRepository.findById(Long.parseLong(placeId));
+                if (findPlace.isEmpty()) {
+                    Place place = Place.builder()
+                            .placeId(Long.parseLong(placeId))
+                            .addressName(addressName)
+                            .roadAddressName(roadAddressName)
+                            .placeName(placeName)
+                            .phone(phone)
+                            .placeUrl(placeUrl)
+                            .x(new BigDecimal(longitude))
+                            .y(new BigDecimal(latitude))
+                            .build();
+                    placeRepository.save(place);
+                } else System.out.println("findPlace = " + findPlace.get().getPlaceName());
             }
         } else {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
         }
 
         return new SearchPlaceResponse(places, totalCount, pageableCount, isEnd);
-    }
-
-    private String getPlaceData(String address) {
-        // 주소 검색하기 api
-        try {
-            String apiUrl = "https://dapi.kakao.com/v2/local/search/address?query=" + URLEncoder.encode(address, "UTF-8");
-            return getData(apiUrl);
-        } catch (UnsupportedEncodingException e) {
-            throw new MeetingException(FAIL_ENCODING);
-        }
     }
 
     private String getPlaceWithKeywordData(String placeName, int page, int size) {

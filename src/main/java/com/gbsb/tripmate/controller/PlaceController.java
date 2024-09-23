@@ -24,13 +24,13 @@ public class PlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/places")
-    BaseResponse<SearchPlaceResponse> searchPlace(
+    BaseResponse<List<Place>> searchPlace(
             @RequestParam String placeName,
             @RequestParam int page,
             @RequestParam int size
     ) {
-        SearchPlaceResponse placeResponse = placeService.getPlaceWithKeywordFromApi(placeName, page, size);
-        return new BaseResponse<>("장소 검색 성공", placeResponse);
+        List<Place> placeList = placeService.getPlaceWithKeywordFromApi(placeName, page, size);
+        return new BaseResponse<>("장소 검색 성공", placeList);
     }
 
 }
