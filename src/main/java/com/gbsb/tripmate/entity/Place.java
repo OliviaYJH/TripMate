@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 public class Place {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long placeId;
 
     private String addressName; // 지번 주소

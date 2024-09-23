@@ -1,6 +1,7 @@
 package com.gbsb.tripmate.controller;
 
 import com.gbsb.tripmate.dto.BaseResponse;
+import com.gbsb.tripmate.dto.SearchPlaceResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.exception.MeetingException;
 import com.gbsb.tripmate.service.PlaceService;
@@ -23,13 +24,13 @@ public class PlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/places")
-    BaseResponse<List<Place>> searchPlace(
+    BaseResponse<SearchPlaceResponse> searchPlace(
             @RequestParam String placeName,
-            @RequestParam BigDecimal x,
-            @RequestParam BigDecimal y
+            @RequestParam int page,
+            @RequestParam int size
     ) {
-        List<Place> place = placeService.getPlaceWithKeywordFromApi(placeName, x, y);
-        return new BaseResponse<>("장소 검색 성공", place);
+        SearchPlaceResponse placeResponse = placeService.getPlaceWithKeywordFromApi(placeName, page, size);
+        return new BaseResponse<>("장소 검색 성공", placeResponse);
     }
 
 }

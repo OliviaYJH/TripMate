@@ -1,5 +1,6 @@
 package com.gbsb.tripmate.service;
 
+import com.gbsb.tripmate.dto.SearchPlaceResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
@@ -34,9 +35,9 @@ public class PlaceService {
 //        return parsePlace(placeData);
 //    }
 
-    public List<Place> getPlaceWithKeywordFromApi(String placeName, BigDecimal x, BigDecimal y) {
+    public SearchPlaceResponse getPlaceWithKeywordFromApi(String placeName, int page, int size) {
         // 장소 검색 api
-        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, x, y);
+        String placeDataWithKeyword = getPlaceWithKeywordData(placeName, page, size);
         return parsePlaceWithKeyword(placeDataWithKeyword);
     }
 
@@ -73,7 +74,7 @@ public class PlaceService {
         }
     }
 
-    private List<Place> parsePlaceWithKeyword(String jsonString) {
+    private SearchPlaceResponse parsePlaceWithKeyword(String jsonString) {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
 
@@ -83,6 +84,11 @@ public class PlaceService {
             throw new MeetingException(FAIL_ENCODING);
         }
 
+        JSONObject meta = (JSONObject) jsonObject.get("meta");
+        Long totalCount = (Long) meta.get("total_count");
+        Long pageableCount = (Long) meta.get("pageable_count");
+        boolean isEnd = (Boolean) meta.get("is_end");
+
         JSONArray documents = (JSONArray) jsonObject.get("documents");
         List<Place> places = new ArrayList<>();
 
@@ -90,6 +96,7 @@ public class PlaceService {
             for (Object docObj : documents) {
                 JSONObject document = (JSONObject) docObj;
 
+                String placeId = (String) document.get("id");
                 String addressName = (String) document.get("address_name");
                 String roadAddressName = (String) document.get("road_address_name");
                 String placeName = (String) document.get("place_name");
@@ -99,6 +106,7 @@ public class PlaceService {
                 String longitude = (String) document.get("x");
 
                 Place place = Place.builder()
+                        .placeId(Long.parseLong(placeId))
                         .addressName(addressName)
                         .roadAddressName(roadAddressName)
                         .placeName(placeName)
@@ -114,7 +122,7 @@ public class PlaceService {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
         }
 
-        return places;
+        return new SearchPlaceResponse(places, totalCount, pageableCount, isEnd);
     }
 
     private String getPlaceData(String address) {
@@ -127,11 +135,14 @@ public class PlaceService {
         }
     }
 
-    private String getPlaceWithKeywordData(String placeName, BigDecimal x, BigDecimal y) {
+    private String getPlaceWithKeywordData(String placeName, int page, int size) {
         // 키워드로 장소 검색하기 api
         try {
-            String apiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query=" + URLEncoder.encode(placeName, "UTF-8")
-             + "&x=" + x + "&y=" + y + "&radius=10000";
+            String apiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query="
+                    + URLEncoder.encode(placeName, "UTF-8")
+                    + "&page=" + page
+                    + "&size=" + size;
+            // 페이징 처
             return getData(apiUrl);
 
         } catch (UnsupportedEncodingException e) {
