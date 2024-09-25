@@ -1,6 +1,7 @@
 package com.gbsb.tripmate.dto;
 
 import com.gbsb.tripmate.enums.AgeGroup;
+import com.gbsb.tripmate.enums.AgeRange;
 import com.gbsb.tripmate.enums.Gender;
 import com.gbsb.tripmate.enums.TravelStyle;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class UpdateMeeting {
         private String description;
         private String destination;
         private Gender gender;
-        private AgeGroup ageRange;
+        private AgeRange ageRange;
         private TravelStyle travelStyle;
         private int memberMax;
         private LocalDate travelStartDate;
