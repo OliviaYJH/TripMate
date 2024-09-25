@@ -2,6 +2,7 @@ package com.gbsb.tripmate.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -24,4 +25,7 @@ public class Plan {
 
     @Column(nullable = false)
     private LocalDate planDate;
+
+    @ColumnDefault("false")
+    private boolean isDeleted;
 }

@@ -3,6 +3,7 @@ package com.gbsb.tripmate.entity;
 import com.gbsb.tripmate.enums.TravelStyle;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -41,4 +42,7 @@ public class PlanItem {
     private BigDecimal y;
 
     private int itemOrder;
+
+    @ColumnDefault("false")
+    private boolean isDeleted;
 }
