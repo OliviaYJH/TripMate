@@ -26,13 +26,13 @@ public class PlanController {
     }
 
     // 세부 일정 추가
-//    @PostMapping("/{meetingId}")
-//    BaseResponse<PlanItem> addPlanItem(
-//            @PathVariable Long meetingId,
-//            @PathVariable Long travelPlanId,
-//            @RequestBody PlanItemCreate.Request request
-//    ) {
-//        planService.createPlanItem(meetingId, travelPlanId, request);
-//        return new BaseResponse<>("세부 일정을 생성했습니다.", null);
-//    }
+    @PostMapping("/{meetingId}/{travelPlanId}")
+    BaseResponse<PlanItem> addPlanItem(
+            @PathVariable Long meetingId,
+            @PathVariable Long travelPlanId,
+            @RequestBody PlanItemCreate.Request request
+    ) {
+        planService.createPlanItem(meetingId, travelPlanId, request);
+        return new BaseResponse<>("세부 일정을 생성했습니다.", null);
+    }
 }

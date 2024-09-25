@@ -59,7 +59,7 @@ public class PlaceService {
         return new PlacePageResponse(places, currentPage, totalPages, totalElements, hasNext);
     }
 
-    private void getPlaceWithCategoryFromApi(String placeName) {
+    public void getPlaceWithCategoryFromApi(String placeName) {
         String placeDataWithKeyword = "";
         SearchPlaceWithKeywordResponse searchPlaceWithKeywordResponse = new SearchPlaceWithKeywordResponse(Collections.emptyList(), 1, true);
         do {

@@ -96,7 +96,7 @@ public class MeetingService {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String userEmail = userDetails.getUsername();
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
@@ -125,7 +125,7 @@ public class MeetingService {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String userEmail = userDetails.getUsername();
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
         // groupId로 참여할 모임 찾기
         Meeting meeting = meetingRepository.findById(meetingId)

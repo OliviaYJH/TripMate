@@ -3,11 +3,13 @@ package com.gbsb.tripmate.service;
 import com.gbsb.tripmate.dto.PlanCreate;
 import com.gbsb.tripmate.dto.PlanItemCreate;
 import com.gbsb.tripmate.entity.Meeting;
+import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.entity.Plan;
 import com.gbsb.tripmate.entity.PlanItem;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
 import com.gbsb.tripmate.repository.MeetingRepository;
+import com.gbsb.tripmate.repository.PlaceRepository;
 import com.gbsb.tripmate.repository.PlanItemRepository;
 import com.gbsb.tripmate.repository.PlanRepository;
 import lombok.AllArgsConstructor;
@@ -23,10 +25,18 @@ public class PlanService {
     private final PlanRepository planRepository;
     private final PlanItemRepository planItemRepository;
     private final MeetingRepository meetingRepository;
+    private final PlaceRepository placeRepository;
 
     public void createPlan(Long meetingId, PlanCreate.Request request) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+
+        List<Plan> planList = planRepository.findAllByMeeting(meeting);
+        for (Plan value : planList) {
+            if (value.getPlanDate().equals(request.getPlanDate())) {
+                throw new MeetingException(ErrorCode.ALREADY_DATE_EXIST);
+            }
+        }
 
         Plan plan = Plan.builder()
                 .meeting(meeting)
@@ -37,30 +47,53 @@ public class PlanService {
     }
 
     public PlanItem createPlanItem(Long meetingId, Long travelPlanId, PlanItemCreate.Request request) {
-        // 해당 meetingId List<Plan> 가져오기
-        List<Plan> planList = planRepository.findAllByMeeting(meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT)));
-        System.out.println("planList = " + planList);
+        meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
-        // placeId에 해당하는 장소 추가해놓기
+        Plan plan = planRepository.findById(travelPlanId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        // 여기에 travelDate와 일치하는 Plan이 있으면 meetingId 가져오기
-        // 없으면 Plan에 추가하고 meetingId 가져오기
+        List<PlanItem> planItemList = planItemRepository.findByPlanOrderByStartTimeAsc(plan);
 
-        // meetingId 없을 때 예외처리
+        Place place = placeRepository.findById(request.getPlaceId())
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
 
-        ////
+        int newOrder = 1; // default
+        if (!planItemList.isEmpty()) {
+            for (int i = 0; i < planItemList.size(); i++) {
+                PlanItem currentItem = planItemList.get(i);
 
-        // 시작 시간이 null이면 예외처리
-        // placeId 유효성 처리
+                // 시작 시간이 같은 여행이 있는 경우
+                if (request.getStartTime().equals(currentItem.getStartTime())) {
+                    throw new MeetingException(ErrorCode.ALREADY_SAME_START_TIME_EXIST);
+                }
 
-        // placeId에 해당하는 x, y값 가져오기
+                if (request.getStartTime().isBefore(currentItem.getStartTime())) {
+                    newOrder = i + 1;
+                    break;
+                } else {
+                    newOrder = planItemList.size() + 1;
+                }
+            }
+            for (int i = newOrder - 1; i < planItemList.size(); i++) {
+                PlanItem itemUpdate = planItemList.get(i);
+                itemUpdate.setItemOrder(itemUpdate.getItemOrder() + 1);
+                planItemRepository.save(itemUpdate);
+            }
+        }
 
-        // 현재 해당 meetingId에 해당하는 List<PlanItem>의 size() 가져와서
-        // 없으면 order이 1
-        // 해당 meetingId PlanItem에 추가하기
-
-
+        PlanItem planItem = PlanItem.builder()
+                .plan(plan)
+                .itemName(request.getPlanItemName())
+                .itemType(request.getTravelStyle())
+                .itemDescription(request.getPlanItemDescription())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .x(place.getX())
+                .y(place.getY())
+                .itemOrder(newOrder)
+                .build();
+        planItemRepository.save(planItem);
         return null;
     }
 }
