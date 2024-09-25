@@ -1,6 +1,5 @@
 package com.gbsb.tripmate.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,5 @@
 package com.gbsb.tripmate.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

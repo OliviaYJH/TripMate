@@ -1,66 +1,75 @@
 package com.gbsb.tripmate.entity;
 
+import com.gbsb.tripmate.enums.AgeGroup;
 import com.gbsb.tripmate.enums.Gender;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 
-@Entity
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "User")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String userEmail;
+    @Column(unique = true, nullable = false)
+    private String email;
 
     @Column(nullable = false)
-    private String userPassword;
+    private String password;
 
-    @Column
-    private String userNickname;
+    @Column(unique = true, nullable = false)
+    private String nickname;
 
-    @Column
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Gender gender;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate birthdate;
 
-    @Column
-    private String userName;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AgeGroup ageGroup;
 
-    @Transient
-    private Integer ageRange;
+    @Column(nullable = false)
+    private String name;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String introduce;
 
-    @Column
     private LocalDateTime createdDate;
-
-    @Column
     private LocalDateTime removedDate;
-
-    @Column
     private LocalDateTime modifiedDate;
 
-
-    public Integer getAgeRange() {
+    @PrePersist
+    @PreUpdate
+    private void calculateAgeGroup() {
         if (this.birthdate != null) {
-            return Period.between(this.birthdate, LocalDate.now()).getYears() / 10 * 10;
+            int age = LocalDate.now().getYear() - this.birthdate.getYear();
+            this.ageGroup = getAgeGroupFromAge(age);
         }
-        return null;
     }
 
-
+    private AgeGroup getAgeGroupFromAge(int age) {
+        if (age < 20) return AgeGroup.TEENS;
+        else if (age < 30) return AgeGroup.TWENTIES;
+        else if (age < 40) return AgeGroup.THIRTIES;
+        else if (age < 50) return AgeGroup.FORTIES;
+        else if (age < 60) return AgeGroup.FIFTIES;
+        else return AgeGroup.SIXTIES_PLUS;
+    }
 }
+

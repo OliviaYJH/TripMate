@@ -1,5 +1,6 @@
 package com.gbsb.tripmate.dto;
 
+import com.gbsb.tripmate.enums.AgeGroup;
 import com.gbsb.tripmate.enums.AgeRange;
 import com.gbsb.tripmate.enums.Gender;
 import com.gbsb.tripmate.enums.TravelStyle;

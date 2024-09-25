@@ -1,6 +1,5 @@
 package com.gbsb.tripmate.security;
 
-
 import com.gbsb.tripmate.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

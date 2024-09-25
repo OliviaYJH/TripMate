@@ -6,7 +6,6 @@ import com.gbsb.tripmate.dto.LoginRequest;
 import com.gbsb.tripmate.dto.SignUpRequest;
 import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.service.UserService;
-import com.gbsb.tripmate.service.UserRegistrationService;
 import com.gbsb.tripmate.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,6 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserRegistrationService userServiceImpl;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -37,15 +33,15 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         User user = new User();
-        user.setUserEmail(signUpRequest.getEmail());
-        user.setUserPassword(signUpRequest.getPassword());
-        user.setUserNickname(signUpRequest.getNickname());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPassword(signUpRequest.getPassword());
+        user.setNickname(signUpRequest.getNickname());
         user.setGender(signUpRequest.getGender());
         user.setBirthdate(LocalDate.parse(signUpRequest.getBirthdate()));
-        user.setUserName(signUpRequest.getName());
+        user.setName(signUpRequest.getName());
         user.setIntroduce(signUpRequest.getIntroduce());
 
-        userServiceImpl.registerUser(user);
+        userService.registerUser(user);
 
         return ResponseEntity.ok(new ApiResponse(true, "User registered successfully"));
     }
@@ -67,7 +63,7 @@ public class AuthController {
 
     @GetMapping("/check-email")
     public ResponseEntity<?> checkEmailAvailability(@RequestParam String email) {
-        boolean isAvailable = !userServiceImpl.existsByEmail(email);
+        boolean isAvailable = !userService.existsByEmail(email);
         return ResponseEntity.ok(new ApiResponse(isAvailable,
                 isAvailable ? "Email is available" : "Email is already in use"));
     }

@@ -1,11 +1,14 @@
 package com.gbsb.tripmate.entity;
+
 import com.gbsb.tripmate.dto.UpdateMeeting;
+import com.gbsb.tripmate.enums.AgeGroup;
 import com.gbsb.tripmate.enums.AgeRange;
 import com.gbsb.tripmate.enums.Gender;
 import com.gbsb.tripmate.enums.TravelStyle;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -20,7 +23,7 @@ public class Meeting {
     private Long meetingId;
 
     @ManyToOne
-    @JoinColumn(name = "group_leader_id")
+    @JoinColumn(name = "meeting_leader_id", nullable = false)
     private User meetingLeader;
 
     @Column(nullable = false)
@@ -32,6 +35,10 @@ public class Meeting {
     @Column
     @Enumerated(EnumType.STRING)
     private Gender genderCondition;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private AgeGroup ageGroup;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -48,16 +55,18 @@ public class Meeting {
     private Integer memberMax;
 
     @Column
-    private LocalDateTime createdDate;
+    private LocalDate createdDate;
 
     @Column
-    private LocalDateTime updatedDate;
+    private LocalDate updatedDate;
 
     @Column
-    private LocalDateTime travelStartDate;
+    private LocalDate travelStartDate;
 
     @Column
-    private LocalDateTime travelEndDate;
+    private LocalDate travelEndDate;
+
+    private Boolean isDeleted = false;
 
     public void setTripGroup(UpdateMeeting.Request tripGroup) {
         this.meetingTitle = tripGroup.getMeetingTitle();
@@ -67,7 +76,7 @@ public class Meeting {
         this.ageRange = tripGroup.getAgeRange();
         this.travelStyle = tripGroup.getTravelStyle();
         this.memberMax = tripGroup.getMemberMax();
-        this.travelStartDate = tripGroup.getTravelStartDate().atStartOfDay();
-        this.travelEndDate = tripGroup.getTravelEndDate().atStartOfDay();
+        this.travelStartDate = tripGroup.getTravelStartDate();
+        this.travelEndDate = tripGroup.getTravelEndDate();
     }
 }

@@ -1,10 +1,10 @@
 package com.gbsb.tripmate.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "meeting_member")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,7 +22,7 @@ public class MeetingMember {
     private Long meetingMemberId;
 
     @ManyToOne
-    @JoinColumn(name = "id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne

@@ -1,6 +1,5 @@
 package com.gbsb.tripmate.service;
 
-
 import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.repository.UserRepository;
 import lombok.Getter;
@@ -42,12 +41,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         @Override
         public String getPassword() {
-            return user.getUserPassword();
+            return user.getPassword();
         }
 
         @Override
         public String getUsername() {
-            return user.getUserEmail();
+            return user.getEmail();
         }
 
         @Override

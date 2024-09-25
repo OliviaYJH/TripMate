@@ -1,6 +1,5 @@
 package com.gbsb.tripmate.dto;
 
-
 import lombok.Getter;
 
 @Getter

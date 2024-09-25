@@ -1,6 +1,5 @@
 package com.gbsb.tripmate.exception;
 
-
 import com.gbsb.tripmate.enums.ErrorCode;
 import lombok.*;
 
