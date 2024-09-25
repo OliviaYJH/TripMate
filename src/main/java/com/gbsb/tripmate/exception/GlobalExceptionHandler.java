@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.io.UnsupportedEncodingException;
+
 import static com.gbsb.tripmate.enums.ErrorCode.*;
 
 @Slf4j
@@ -36,5 +38,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         return new ErrorResponse(INVALID_INPUT, INVALID_INPUT.getDescription());
+    }
+
+    @ExceptionHandler(UnsupportedEncodingException.class)
+    public ErrorResponse handleUnsupportedEncodingException(UnsupportedEncodingException e) {
+        return new ErrorResponse(FAIL_ENCODING, FAIL_ENCODING.getDescription());
     }
 }

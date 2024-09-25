@@ -55,7 +55,7 @@ public class MeetingController {
             return new BaseResponse<>("모임 삭제에 실패했습니다.", false);
         }
     }
-
+  
     // 모임 탈퇴
     @DeleteMapping("/{meetingId}/leave")
     public BaseResponse<Boolean> leaveMeeting(@PathVariable long meetingId, @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user) {
