@@ -12,6 +12,10 @@ import com.gbsb.tripmate.repository.MeetingMemberRepository;
 import com.gbsb.tripmate.repository.MeetingRepository;
 import com.gbsb.tripmate.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -62,6 +66,26 @@ public class MeetingService {
 
         meetingMemberRepository.save(leader);
         return savedMeeting;
+    }
+
+    // 모임 목록 조회
+    public Page<MeetingResponse> getAllMeetings(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<Meeting> meetings = meetingRepository.findAll(pageable);
+
+        return meetings.map(this::convertToDto);
+    }
+
+    private MeetingResponse convertToDto(Meeting meeting) {
+        return new MeetingResponse(
+                meeting.getMeetingId(),
+                meeting.getMeetingTitle(),
+                meeting.getMeetingDescription(),
+                meeting.getDestination(),
+                meeting.getMeetingLeader().getNickname(),
+                meeting.getTravelStartDate(),
+                meeting.getTravelEndDate()
+        );
     }
 
     // 모임 삭제
@@ -210,7 +234,6 @@ public class MeetingService {
         // 모임장인지 확인
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
-        
 
         if (!meeting.getMeetingLeader().getId().equals(leaderId)) {
             throw new RuntimeException("모임장만 멤버를 탈퇴시킬 수 있습니다.");
