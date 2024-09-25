@@ -4,6 +4,7 @@ import com.gbsb.tripmate.dto.*;
 import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.service.CustomUserDetailsService;
 import com.gbsb.tripmate.service.MeetingService;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,16 @@ public class MeetingController {
         } catch (Exception e) {
             return new BaseResponse<>("모임 개설에 실패했습니다.", false);
         }
+    }
+
+    // 모임 목록 조회
+    @GetMapping
+    public Page<MeetingResponse> getMeetings(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdDate") String sortBy
+    ) {
+        return meetingService.getAllMeetings(page, size, sortBy);
     }
 
     @PutMapping("/{meetingId}")
