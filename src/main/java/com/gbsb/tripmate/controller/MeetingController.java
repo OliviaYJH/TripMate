@@ -1,11 +1,8 @@
 package com.gbsb.tripmate.controller;
 
-import com.gbsb.tripmate.dto.BaseResponse;
-import com.gbsb.tripmate.dto.MeetingCreateRequest;
-import com.gbsb.tripmate.dto.JoinMeeting;
-import com.gbsb.tripmate.dto.UpdateMeeting;
+import com.gbsb.tripmate.dto.*;
 import com.gbsb.tripmate.entity.Meeting;
-import com.gbsb.tripmate.entity.User;
+import com.gbsb.tripmate.service.CustomUserDetailsService;
 import com.gbsb.tripmate.service.MeetingService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +14,13 @@ import lombok.RequiredArgsConstructor;
 public class MeetingController {
     private final MeetingService meetingService;
 
-    public MeetingController(MeetingService meetingService) {
-        this.meetingService = meetingService;
-    }
-
     // 모임 생성
     @PostMapping("/create")
-    public BaseResponse<Boolean> createGroup(@RequestBody MeetingCreateRequest request, @AuthenticationPrincipal User user) {
+    public BaseResponse<Boolean> createGroup(@RequestBody MeetingCreateRequest request, @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user) {
         try {
             Meeting newMeeting = meetingService.createMeeting(user.getId(), request);
             return new BaseResponse<>("모임이 개설되었습니다.", true);
         } catch (Exception e) {
-            e.printStackTrace();
             return new BaseResponse<>("모임 개설에 실패했습니다.", false);
         }
     }
@@ -53,14 +45,37 @@ public class MeetingController {
   
     // 모임 삭제
     @DeleteMapping("/{meetingId}")
-    public BaseResponse<Boolean> deleteMeeting(@PathVariable long meetingId, @AuthenticationPrincipal User user) {
+    public BaseResponse<Boolean> deleteMeeting(@PathVariable long meetingId, @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user) {
         try {
             meetingService.deleteMeeting(user.getId(), meetingId);
             return new BaseResponse<>("모임이 삭제되었습니다.", true);
         } catch (RuntimeException e) {
             return new BaseResponse<>(e.getMessage(), false);
         } catch (Exception e) {
-            e.printStackTrace();
             return new BaseResponse<>("모임 삭제에 실패했습니다.", false);
-        }  
+        }
+    }
+
+    // 모임 탈퇴
+    @DeleteMapping("/{meetingId}/leave")
+    public BaseResponse<Boolean> leaveMeeting(@PathVariable long meetingId, @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user) {
+        try{
+            meetingService.leaveMeeting(user.getId(), meetingId);
+            return new BaseResponse<>("모임에서 탈퇴하였습니다.", true);
+        } catch (Exception e) {
+            return new BaseResponse<>(e.getMessage(), false);
+        }
+    }
+
+    // 멤버 내보내기
+    @PostMapping("/{meetingId}/remove-member")
+    public BaseResponse<Boolean> removeMember(@PathVariable long meetingId, @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails leader,
+                                              @RequestBody RemoveMemberRequest request) {
+        try {
+            meetingService.removeMember(leader.getId(), meetingId, request);
+            return new BaseResponse<>("멤버가 탈퇴되었습니다.", true);
+        } catch (Exception e) {
+            return new BaseResponse<>(e.getMessage(), false);
+        }
+    }
 }

@@ -1,8 +1,6 @@
 package com.gbsb.tripmate.service;
 
-import com.gbsb.tripmate.dto.MeetingCreateRequest;
-import com.gbsb.tripmate.dto.JoinMeeting;
-import com.gbsb.tripmate.dto.UpdateMeeting;
+import com.gbsb.tripmate.dto.*;
 import com.gbsb.tripmate.entity.DailyParticipation;
 import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.entity.MeetingMember;
@@ -14,7 +12,6 @@ import com.gbsb.tripmate.repository.MeetingMemberRepository;
 import com.gbsb.tripmate.repository.MeetingRepository;
 import com.gbsb.tripmate.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.elasticsearch.ResourceNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -37,7 +34,7 @@ public class MeetingService {
     // 모임 생성
     public Meeting createMeeting(Long id, MeetingCreateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
 
         Meeting meeting = Meeting.builder()
                 .meetingLeader(user)
@@ -70,7 +67,7 @@ public class MeetingService {
     // 모임 삭제
     public void deleteMeeting(Long id, Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new ResourceNotFoundException("모임을 찾을 수 없습니다."));
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
         if (!meeting.getMeetingLeader().getId().equals(id)) {
             throw new RuntimeException("모임장만 모임을 삭제할 수 있습니다.");
@@ -90,6 +87,7 @@ public class MeetingService {
 
         meeting.setIsDeleted(true);
         meetingRepository.save(meeting);
+    }
 
     public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -178,5 +176,67 @@ public class MeetingService {
                     .build();
             dailyParticipationRepository.save(dailyParticipation);
         }
+    }
+
+    // 모임 탈퇴
+    public void leaveMeeting(Long id, Long meetingId) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() ->  new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+
+        MeetingMember meetingMember = meetingMemberRepository.findByMeetingAndUser(meeting, user)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+
+        if (meetingMember.getIsLeader()) {
+            throw new RuntimeException("모임장은 모임에서 탈퇴할 수 없습니다.");
+        }
+
+        List<LocalDate> participationDates = dailyParticipationRepository.findParticipationDatesById(user.getId());
+
+        for (LocalDate participationDate : participationDates) {
+            DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDate(user, participationDate)
+                    .orElseThrow(() -> new RuntimeException("해당 날짜의 참여 데이터가 없습니다."));
+
+            dailyParticipationRepository.delete(dailyParticipation);
+        }
+
+        meetingMemberRepository.delete(meetingMember);
+    }
+
+    // 멤버 내보내기
+    public void removeMember(Long leaderId, Long meetingId, RemoveMemberRequest request) {
+        // 모임장인지 확인
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+        
+
+        if (!meeting.getMeetingLeader().getId().equals(leaderId)) {
+            throw new RuntimeException("모임장만 멤버를 탈퇴시킬 수 있습니다.");
+        }
+
+        // 탈퇴할 멤버 확인
+        MeetingMember member = meetingMemberRepository.findByMeetingAndUserId(meeting, request.getMeetingMemberId())
+                .orElseThrow(() -> new RuntimeException("해당 사용자는 이 모임의 멤버가 아닙니다."));
+
+        if (member.getIsLeader()) {
+            throw new RuntimeException("모임장은 자신을 탈퇴시킬 수 없습니다.");
+        }
+
+        // 부분참여 테이블에서도 삭제
+        List<LocalDate> participationDates = dailyParticipationRepository.findParticipationDatesById(member.getUser().getId());
+
+        for (LocalDate participationDate : participationDates) {
+            DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDate(member.getUser(), participationDate)
+                    .orElseThrow(() -> new RuntimeException("해당 날짜의 참여 데이터가 없습니다."));
+
+            dailyParticipationRepository.delete(dailyParticipation);
+        }
+
+        // 탈퇴사유 확인 위해 상태변경으로 구현
+        member.setRemoveReason(request.getReason());
+        member.setIsRemoved(true);
+        meetingMemberRepository.save(member);
     }
 }
