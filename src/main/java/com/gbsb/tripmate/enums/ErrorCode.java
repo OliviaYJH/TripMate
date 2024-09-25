@@ -16,7 +16,9 @@ public enum ErrorCode {
     INVALID_INPUT("입력한 내용을 확인해주세요."),
     ALREADY_JOINED_DATE("이미 참여한 여행 날짜입니다."),
     USER_AND_MEETING_UNMATCHED("해당 유저가 생성한 모임이 아닙니다."),
-    CREATED_BY_USER("해당 유저가 생성한 모임입니다.");
+    CREATED_BY_USER("해당 유저가 생성한 모임입니다."),
+    FAIL_ENCODING("정보를 가져오지 못했습니다."),
+    INVALID_ADDRESS("주소에 해당하는 장소가 없습니다. ");
 
     private final String description;
 }
