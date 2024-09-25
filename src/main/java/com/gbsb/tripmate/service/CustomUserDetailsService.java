@@ -2,7 +2,6 @@ package com.gbsb.tripmate.service;
 
 import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.repository.UserRepository;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -73,5 +72,8 @@ public class CustomUserDetailsService implements UserDetailsService {
             return user;
         }
 
+        public Long getId() {
+            return user.getId();
+        }
     }
 }

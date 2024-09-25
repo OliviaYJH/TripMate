@@ -73,7 +73,7 @@ public class Meeting {
         this.meetingDescription = tripGroup.getDescription();
         this.destination = tripGroup.getDestination();
         this.genderCondition = tripGroup.getGender();
-        this.ageRange = tripGroup.getAgeRange();
+        this.ageGroup = tripGroup.getAgeRange();
         this.travelStyle = tripGroup.getTravelStyle();
         this.memberMax = tripGroup.getMemberMax();
         this.travelStartDate = tripGroup.getTravelStartDate();
