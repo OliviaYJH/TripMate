@@ -1,4 +1,7 @@
 package com.gbsb.tripmate.entity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 import com.gbsb.tripmate.enums.TravelStyle;
 import jakarta.persistence.*;

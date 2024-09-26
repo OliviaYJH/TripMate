@@ -26,11 +26,15 @@ public class MeetingMember {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "meeting_id", referencedColumnName = "meetingId")
+    @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
     @Column(nullable = false)
     private LocalDate joinDate;
 
     private Boolean isLeader;
+
+    private String removeReason;
+
+    private Boolean isRemoved = false;
 }
