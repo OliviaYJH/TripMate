@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
 
     @Query("SELECT MIN(tp.planDate) FROM TravelPlan tp WHERE tp.meeting.meetingId IN "
-            + "(SELECT mm.meeting.meetingId FROM MeetingMember mm WHERE mm.user.userId = :userId) "
+            + "(SELECT mm.meeting.meetingId FROM MeetingMember mm WHERE mm.user.Id = :Id) "
             + "AND tp.planDate > CURRENT_DATE")
-    LocalDate findNextTravelDateByUserId(@Param("userId") Long userId);
+    LocalDate findNextTravelDateByUserId(@Param("Id") Long Id);
 }
