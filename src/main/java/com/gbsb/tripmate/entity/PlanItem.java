@@ -21,7 +21,7 @@ public class PlanItem {
 
     @ManyToOne
     @JoinColumn(name = "travel_plan_id", nullable = false)
-    private Plan plan;
+    private TravelPlan travelPlan;
 
     private String itemName;
 

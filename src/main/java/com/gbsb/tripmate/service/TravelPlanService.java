@@ -4,14 +4,14 @@ import com.gbsb.tripmate.dto.PlanCreate;
 import com.gbsb.tripmate.dto.PlanItemCreate;
 import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.entity.Place;
-import com.gbsb.tripmate.entity.Plan;
+import com.gbsb.tripmate.entity.TravelPlan;
 import com.gbsb.tripmate.entity.PlanItem;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
 import com.gbsb.tripmate.repository.MeetingRepository;
 import com.gbsb.tripmate.repository.PlaceRepository;
 import com.gbsb.tripmate.repository.PlanItemRepository;
-import com.gbsb.tripmate.repository.PlanRepository;
+import com.gbsb.tripmate.repository.TravelPlanRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +21,8 @@ import java.util.List;
 @Service
 @Transactional
 @AllArgsConstructor
-public class PlanService {
-    private final PlanRepository planRepository;
+public class TravelPlanService {
+    private final TravelPlanRepository travelPlanRepository;
     private final PlanItemRepository planItemRepository;
     private final MeetingRepository meetingRepository;
     private final PlaceRepository placeRepository;
@@ -31,29 +31,29 @@ public class PlanService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
-        List<Plan> planList = planRepository.findAllByMeeting(meeting);
-        for (Plan value : planList) {
+        List<TravelPlan> travelPlanList = travelPlanRepository.findAllByMeeting(meeting);
+        for (TravelPlan value : travelPlanList) {
             if (value.getPlanDate().equals(request.getPlanDate())) {
                 throw new MeetingException(ErrorCode.ALREADY_DATE_EXIST);
             }
         }
 
-        Plan plan = Plan.builder()
+        TravelPlan travelPlan = TravelPlan.builder()
                 .meeting(meeting)
                 .planTitle(request.getPlanTitle())
                 .planDate(request.getPlanDate())
                 .build();
-        planRepository.save(plan);
+        travelPlanRepository.save(travelPlan);
     }
 
     public PlanItem createPlanItem(Long meetingId, Long travelPlanId, PlanItemCreate.Request request) {
         meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
-        Plan plan = planRepository.findById(travelPlanId)
+        TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        List<PlanItem> planItemList = planItemRepository.findByPlanOrderByStartTimeAsc(plan);
+        List<PlanItem> planItemList = planItemRepository.findByPlanOrderByStartTimeAsc(travelPlan);
 
         Place place = placeRepository.findById(request.getPlaceId())
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
@@ -83,7 +83,7 @@ public class PlanService {
         }
 
         PlanItem planItem = PlanItem.builder()
-                .plan(plan)
+                .travelPlan(travelPlan)
                 .itemName(request.getPlanItemName())
                 .itemType(request.getTravelStyle())
                 .itemDescription(request.getPlanItemDescription())

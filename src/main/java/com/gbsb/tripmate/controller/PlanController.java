@@ -3,9 +3,8 @@ package com.gbsb.tripmate.controller;
 import com.gbsb.tripmate.dto.BaseResponse;
 import com.gbsb.tripmate.dto.PlanCreate;
 import com.gbsb.tripmate.dto.PlanItemCreate;
-import com.gbsb.tripmate.entity.Plan;
 import com.gbsb.tripmate.entity.PlanItem;
-import com.gbsb.tripmate.service.PlanService;
+import com.gbsb.tripmate.service.TravelPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/plan")
 public class PlanController {
-    private final PlanService planService;
+    private final TravelPlanService travelPlanService;
 
     // 일정 추가
     @PostMapping("/{meetingId}")
@@ -21,7 +20,7 @@ public class PlanController {
             @PathVariable Long meetingId,
             @RequestBody PlanCreate.Request request
     ) {
-        planService.createPlan(meetingId, request);
+        travelPlanService.createPlan(meetingId, request);
         return new BaseResponse<>("여행 계획 추가를 성공했습니다.", true);
     }
 
@@ -32,7 +31,7 @@ public class PlanController {
             @PathVariable Long travelPlanId,
             @RequestBody PlanItemCreate.Request request
     ) {
-        planService.createPlanItem(meetingId, travelPlanId, request);
+        travelPlanService.createPlanItem(meetingId, travelPlanId, request);
         return new BaseResponse<>("세부 일정을 생성했습니다.", null);
     }
 }
