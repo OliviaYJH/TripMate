@@ -1,7 +1,6 @@
 package com.gbsb.tripmate.entity;
 
 import com.gbsb.tripmate.dto.UpdateMeeting;
-import com.gbsb.tripmate.enums.AgeGroup;
 import com.gbsb.tripmate.enums.AgeRange;
 import com.gbsb.tripmate.enums.Gender;
 import com.gbsb.tripmate.enums.TravelStyle;
@@ -35,10 +34,6 @@ public class Meeting {
     @Column
     @Enumerated(EnumType.STRING)
     private Gender genderCondition;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    private AgeGroup ageGroup;
 
     @Column
     @Enumerated(EnumType.STRING)

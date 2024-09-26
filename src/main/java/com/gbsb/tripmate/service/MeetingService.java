@@ -38,7 +38,7 @@ public class MeetingService {
     // 모임 생성
     public Meeting createMeeting(Long id, MeetingCreateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
         Meeting meeting = Meeting.builder()
                 .meetingLeader(user)
@@ -46,7 +46,7 @@ public class MeetingService {
                 .meetingDescription(request.getDescription())
                 .destination(request.getDestination())
                 .genderCondition(request.getGender())
-                .ageGroup(request.getAgeGroup())
+                .ageRange(request.getAgeRange())
                 .travelStyle(request.getTravelStyle())
                 .travelStartDate(request.getTravelStartDate())
                 .travelEndDate(request.getTravelEndDate())
@@ -205,13 +205,13 @@ public class MeetingService {
         // 모임 탈퇴
         public void leaveMeeting (Long id, Long meetingId){
             User user = userRepository.findById(id)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
             Meeting meeting = meetingRepository.findById(meetingId)
                     .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
 
             MeetingMember meetingMember = meetingMemberRepository.findByMeetingAndUser(meeting, user)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
             if (meetingMember.getIsLeader()) {
                 throw new RuntimeException("모임장은 모임에서 탈퇴할 수 없습니다.");

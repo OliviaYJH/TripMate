@@ -53,7 +53,7 @@ public class TravelPlanService {
         TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        List<PlanItem> planItemList = planItemRepository.findByPlanOrderByStartTimeAsc(travelPlan);
+        List<PlanItem> planItemList = planItemRepository.findByTravelPlanOrderByStartTimeAsc(travelPlan);
 
         Place place = placeRepository.findById(request.getPlaceId())
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));

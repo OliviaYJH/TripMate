@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "plan")
+@Table(name = "travel_plan")
 public class TravelPlan {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelPlanId;
