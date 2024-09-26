@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
 
-    @Query("SELECT m FROM Meeting m WHERE m.meetingLeader.id = :userId OR m IN (SELECT mm.meeting FROM MeetingMember mm WHERE mm.user.id = :userId)")
-    Page<Meeting> findMeetingsByUserId(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT m FROM Meeting m WHERE m.meetingLeader.id = :Id OR m IN (SELECT mm.meeting FROM MeetingMember mm WHERE mm.user.id = :Id)")
+    Page<Meeting> findMeetingsByUserId(@Param("Id") Long Id, Pageable pageable);
     Page<Meeting> findAll(Pageable pageable);
 }
