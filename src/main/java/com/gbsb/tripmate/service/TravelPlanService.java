@@ -29,7 +29,7 @@ public class TravelPlanService {
 
     public void createPlan(Long meetingId, PlanCreate.Request request) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
         List<TravelPlan> travelPlanList = travelPlanRepository.findAllByMeeting(meeting);
         for (TravelPlan value : travelPlanList) {
@@ -46,9 +46,9 @@ public class TravelPlanService {
         travelPlanRepository.save(travelPlan);
     }
 
-    public PlanItem createPlanItem(Long meetingId, Long travelPlanId, PlanItemCreate.Request request) {
+    public void createPlanItem(Long meetingId, Long travelPlanId, PlanItemCreate.Request request) {
         meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
         TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
@@ -94,6 +94,5 @@ public class TravelPlanService {
                 .itemOrder(newOrder)
                 .build();
         planItemRepository.save(planItem);
-        return null;
     }
 }
