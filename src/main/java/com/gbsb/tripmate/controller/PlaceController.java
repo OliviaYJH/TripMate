@@ -5,20 +5,18 @@ import com.gbsb.tripmate.dto.PlacePageResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.service.PlaceService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/search")
+@RequestMapping("/place")
 public class PlaceController {
     private final PlaceService placeService;
 
-    @GetMapping("/places")
+    // 장소 검색
+    @GetMapping("/search")
     BaseResponse<PlacePageResponse> searchPlace(
             @RequestParam String placeName,
             @RequestParam int page,
@@ -28,4 +26,12 @@ public class PlaceController {
         return new BaseResponse<>("장소 검색 성공", placeList);
     }
 
+    // 장소 상세 정보 조회
+    @GetMapping
+    BaseResponse<Place> getPlaceDetail(
+            @RequestParam Long placeId
+    ) {
+        Place place = placeService.getPlaceDetail(placeId);
+        return new BaseResponse<>("장소 상세 정보 조회 성공", place);
+    }
 }

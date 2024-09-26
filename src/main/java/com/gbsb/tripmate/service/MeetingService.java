@@ -38,7 +38,7 @@ public class MeetingService {
     // 모임 생성
     public Meeting createMeeting(Long id, MeetingCreateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
         Meeting meeting = Meeting.builder()
                 .meetingLeader(user)
@@ -46,7 +46,7 @@ public class MeetingService {
                 .meetingDescription(request.getDescription())
                 .destination(request.getDestination())
                 .genderCondition(request.getGender())
-                .ageGroup(request.getAgeGroup())
+                .ageRange(request.getAgeRange())
                 .travelStyle(request.getTravelStyle())
                 .travelStartDate(request.getTravelStartDate())
                 .travelEndDate(request.getTravelEndDate())
@@ -91,7 +91,7 @@ public class MeetingService {
     // 모임 삭제
     public void deleteMeeting(Long id, Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
         if (!meeting.getMeetingLeader().getId().equals(id)) {
             throw new RuntimeException("모임장만 모임을 삭제할 수 있습니다.");
@@ -113,14 +113,14 @@ public class MeetingService {
         meetingRepository.save(meeting);
     }
 
-        public void updateMeeting (Long meetingId, UpdateMeeting.Request request){
-            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            String userEmail = userDetails.getUsername();
-            User user = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+    public void updateMeeting(Long meetingId, UpdateMeeting.Request request) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userEmail = userDetails.getUsername();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
             Meeting meeting = meetingRepository.findById(meetingId)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
             if (!Objects.equals(user.getId(), meeting.getMeetingLeader().getId())) {
                 throw new MeetingException(ErrorCode.USER_AND_MEETING_UNMATCHED);
@@ -138,20 +138,19 @@ public class MeetingService {
             meetingRepository.save(meeting);
         }
 
-        public void joinMeeting (
-                Long meetingId,
-                JoinMeeting.Request request
-    )
-        {
-            // 회원 찾기
-            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            String userEmail = userDetails.getUsername();
-            User user = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+    public void joinMeeting(
+            Long meetingId,
+            JoinMeeting.Request request
+    ) {
+        // 회원 찾기
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userEmail = userDetails.getUsername();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
             // groupId로 참여할 모임 찾기
             Meeting meeting = meetingRepository.findById(meetingId)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
             // 내가 생성한 모임에는 참여 불가능
             if (Objects.equals(user.getId(), meeting.getMeetingLeader().getId()))
@@ -206,13 +205,13 @@ public class MeetingService {
         // 모임 탈퇴
         public void leaveMeeting (Long id, Long meetingId){
             User user = userRepository.findById(id)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
             Meeting meeting = meetingRepository.findById(meetingId)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
             MeetingMember meetingMember = meetingMemberRepository.findByMeetingAndUser(meeting, user)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
             if (meetingMember.getIsLeader()) {
                 throw new RuntimeException("모임장은 모임에서 탈퇴할 수 없습니다.");
@@ -234,7 +233,7 @@ public class MeetingService {
         public void removeMember (Long leaderId, Long meetingId, RemoveMemberRequest request){
             // 모임장인지 확인
             Meeting meeting = meetingRepository.findById(meetingId)
-                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUNT));
+                    .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
             if (!meeting.getMeetingLeader().getId().equals(leaderId)) {
                 throw new RuntimeException("모임장만 멤버를 탈퇴시킬 수 있습니다.");
