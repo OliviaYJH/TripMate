@@ -15,4 +15,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     @Query("SELECT m FROM Meeting m WHERE m.meetingLeader.id = :Id OR m IN (SELECT mm.meeting FROM MeetingMember mm WHERE mm.user.id = :Id)")
     Page<Meeting> findMeetingsByUserId(@Param("Id") Long Id, Pageable pageable);
     Page<Meeting> findAll(Pageable pageable);
+
+    @Query("SELECT m FROM Meeting m WHERE (m.meetingLeader.id = :Id OR m IN (SELECT mm.meeting FROM MeetingMember mm WHERE mm.user.id = :Id)) AND m.meetingTitle LIKE %:meetingTitle%")
+    Page<Meeting> searchMeetingsByUserIdAndTitle(@Param("Id") Long userId, @Param("meetingTitle") String meetingTitle, Pageable pageable);
 }
