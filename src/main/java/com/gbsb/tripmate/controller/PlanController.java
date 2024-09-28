@@ -46,4 +46,6 @@ public class PlanController {
         List<PlanItemResponse> planItemResponseList = travelPlanService.getPlanItemDetail(travelPlanId);
         return new BaseResponse<>("세부 일정 조회에 성공했습니다.", planItemResponseList);
     }
+
+    // 세부 일정 삭제 -> itemOrder 재정렬 필요
 }
