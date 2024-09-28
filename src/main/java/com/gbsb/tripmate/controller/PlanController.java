@@ -3,10 +3,13 @@ package com.gbsb.tripmate.controller;
 import com.gbsb.tripmate.dto.BaseResponse;
 import com.gbsb.tripmate.dto.PlanCreate;
 import com.gbsb.tripmate.dto.PlanItemCreate;
+import com.gbsb.tripmate.dto.PlanItemResponse;
 import com.gbsb.tripmate.entity.PlanItem;
 import com.gbsb.tripmate.service.TravelPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,5 +36,14 @@ public class PlanController {
     ) {
         travelPlanService.createPlanItem(meetingId, travelPlanId, request);
         return new BaseResponse<>("세부 일정을 생성했습니다.", null);
+    }
+
+    // 세부 일정 조회
+    @GetMapping("/{travelPlanId}")
+    BaseResponse<List<PlanItemResponse>> getPlanItem(
+            @PathVariable Long travelPlanId
+    ){
+        List<PlanItemResponse> planItemResponseList = travelPlanService.getPlanItemDetail(travelPlanId);
+        return new BaseResponse<>("세부 일정 조회에 성공했습니다.", planItemResponseList);
     }
 }

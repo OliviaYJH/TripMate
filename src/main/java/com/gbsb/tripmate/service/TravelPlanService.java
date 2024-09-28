@@ -2,6 +2,7 @@ package com.gbsb.tripmate.service;
 
 import com.gbsb.tripmate.dto.PlanCreate;
 import com.gbsb.tripmate.dto.PlanItemCreate;
+import com.gbsb.tripmate.dto.PlanItemResponse;
 import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.entity.TravelPlan;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -94,5 +96,27 @@ public class TravelPlanService {
                 .itemOrder(newOrder)
                 .build();
         planItemRepository.save(planItem);
+    }
+
+    public List<PlanItemResponse> getPlanItemDetail(Long travelPlanId) {
+        TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
+
+        List<PlanItem> planItemList = planItemRepository.findAllByTravelPlanOrderByItemOrderAsc(travelPlan);
+        List<PlanItemResponse> planItemResponseList = new ArrayList<>();
+        for (PlanItem plan : planItemList) {
+            PlanItemResponse planItemResponse = PlanItemResponse.builder()
+                    .planItemId(plan.getPlanItemId())
+                    .planDate(plan.getTravelPlan().getPlanDate())
+                    .itemName(plan.getItemName())
+                    .itemType(plan.getItemType())
+                    .itemDescription(plan.getItemDescription())
+                    .startTime(plan.getStartTime())
+                    .endTime(plan.getEndTime())
+                    .itemOrder(plan.getItemOrder())
+                    .build();
+            planItemResponseList.add(planItemResponse);
+        }
+        return planItemResponseList;
     }
 }

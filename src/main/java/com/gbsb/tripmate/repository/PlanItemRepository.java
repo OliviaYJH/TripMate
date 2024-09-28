@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface PlanItemRepository extends JpaRepository<PlanItem, Long> {
     List<PlanItem> findByTravelPlanOrderByStartTimeAsc(TravelPlan travelPlan);
+    List<PlanItem> findAllByTravelPlanOrderByItemOrderAsc(TravelPlan travelPlan);
 }
