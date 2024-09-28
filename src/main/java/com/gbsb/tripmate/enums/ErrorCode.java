@@ -18,7 +18,7 @@ public enum ErrorCode {
     USER_AND_MEETING_UNMATCHED("해당 유저가 생성한 모임이 아닙니다."),
     CREATED_BY_USER("해당 유저가 생성한 모임입니다."),
     FAIL_ENCODING("정보를 가져오지 못했습니다."),
-    INVALID_ADDRESS("주소에 해당하는 장소가 없습니다. "),
+    INVALID_ADDRESS("주소에 해당하는 장소가 없습니다."),
     ALREADY_DATE_EXIST("해당 날짜에 해당하는 계획이 이미 존재합니다."),
     PLAN_NOT_FOUND("해당하는 여행 계획이 없습니다."),
     PLACE_NOT_FOUND("해당 장소는 없는 장소입니다."),

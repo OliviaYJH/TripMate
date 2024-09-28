@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -28,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import static com.gbsb.tripmate.enums.ErrorCode.FAIL_ENCODING;
+import static com.gbsb.tripmate.util.Constants.*;
 
 @Service
 @Transactional
@@ -64,6 +64,13 @@ public class PlaceService {
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
     }
 
+    public SearchPlaceWithKeywordResponse getRestaurant(Long placeId, int page, int size) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
+
+        return getRestaurantWithCategoryFromApi(RESTAURANT, place.getX(), place.getY(), RESTAURANT_RADIUS, page, size);
+    }
+
     public void getPlaceWithCategoryFromApi(String placeName) {
         String placeDataWithKeyword = "";
         SearchPlaceWithKeywordResponse searchPlaceWithKeywordResponse = new SearchPlaceWithKeywordResponse(Collections.emptyList(), 1, true);
@@ -71,6 +78,11 @@ public class PlaceService {
             placeDataWithKeyword = getPlaceWithKeywordData(placeName, searchPlaceWithKeywordResponse.getPage() + 1);
             searchPlaceWithKeywordResponse = parsePlaceWithKeyword(placeDataWithKeyword, searchPlaceWithKeywordResponse.getPage() + 1);
         } while (!searchPlaceWithKeywordResponse.isEnd() && searchPlaceWithKeywordResponse.getPage() >= 1 && searchPlaceWithKeywordResponse.getPage() <= 45);
+    }
+
+    public SearchPlaceWithKeywordResponse getRestaurantWithCategoryFromApi(String query, double x, double y, int radius, int page, int size) {
+        String restaurantDataWithKeyword = getRestaurantWithKeywordData(query, x, y, radius, page, size);
+        return parsePlaceWithKeyword(restaurantDataWithKeyword, page);
     }
 
     private SearchPlaceWithKeywordResponse parsePlaceWithKeyword(String jsonString, int page) {
@@ -103,19 +115,20 @@ public class PlaceService {
                 String longitude = (String) document.get("x");
 
                 Optional<Place> findPlace = placeRepository.findById(Long.parseLong(placeId));
+                Place place = Place.builder()
+                        .placeId(Long.parseLong(placeId))
+                        .addressName(addressName)
+                        .roadAddressName(roadAddressName)
+                        .placeName(placeName)
+                        .phone(phone)
+                        .placeUrl(placeUrl)
+                        .x(Double.parseDouble(longitude))
+                        .y(Double.parseDouble(latitude))
+                        .build();
                 if (findPlace.isEmpty()) {
-                    Place place = Place.builder()
-                            .placeId(Long.parseLong(placeId))
-                            .addressName(addressName)
-                            .roadAddressName(roadAddressName)
-                            .placeName(placeName)
-                            .phone(phone)
-                            .placeUrl(placeUrl)
-                            .x(new BigDecimal(longitude))
-                            .y(new BigDecimal(latitude))
-                            .build();
                     placeRepository.save(place);
                 }
+                places.add(place);
             }
         } else {
             throw new MeetingException(ErrorCode.INVALID_ADDRESS);
@@ -130,9 +143,24 @@ public class PlaceService {
             String apiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query="
                     + URLEncoder.encode(placeName, "UTF-8")
                     + "&page=" + page
-                    + "&size=" + 15;
+                    + "&size=" + KAKAO_API_SIZE;
             return getData(apiUrl);
 
+        } catch (UnsupportedEncodingException e) {
+            throw new MeetingException(FAIL_ENCODING);
+        }
+    }
+
+    private String getRestaurantWithKeywordData(String query, double x, double y, int radius, int page, int size) {
+        try {
+            String apiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query="
+                    + URLEncoder.encode(query, "UTF-8")
+                    + "&x=" + x
+                    + "&y=" + y
+                    + "&radius=" + radius
+                    + "&page=" + page
+                    + "&size=" + size;
+            return getData(apiUrl);
         } catch (UnsupportedEncodingException e) {
             throw new MeetingException(FAIL_ENCODING);
         }
