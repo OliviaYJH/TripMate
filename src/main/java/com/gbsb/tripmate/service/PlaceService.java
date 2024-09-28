@@ -71,6 +71,13 @@ public class PlaceService {
         return getRestaurantWithCategoryFromApi(RESTAURANT, place.getX(), place.getY(), RESTAURANT_RADIUS, page, size);
     }
 
+    public SearchPlaceWithKeywordResponse getAttraction(Long placeId, int page, int size) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
+
+        return getRestaurantWithCategoryFromApi(ATTRACTION, place.getX(), place.getY(), ATTRACTION_RADIUS, page, size);
+    }
+
     public void getPlaceWithCategoryFromApi(String placeName) {
         String placeDataWithKeyword = "";
         SearchPlaceWithKeywordResponse searchPlaceWithKeywordResponse = new SearchPlaceWithKeywordResponse(Collections.emptyList(), 1, true);

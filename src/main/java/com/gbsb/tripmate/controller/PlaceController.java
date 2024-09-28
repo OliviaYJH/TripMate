@@ -47,6 +47,14 @@ public class PlaceController {
         return new BaseResponse<>("맛집 정보 조회 성공", placePageResponse);
     }
 
-    // 관광지 추천 api
-
+    // 명소 추천 api
+    @GetMapping("/attraction")
+    BaseResponse<SearchPlaceWithKeywordResponse> getAttraction(
+            @RequestParam Long placeId,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        SearchPlaceWithKeywordResponse placePageResponse = placeService.getAttraction(placeId, page, size);
+        return new BaseResponse<>("명소 정보 조회 성공", placePageResponse);
+    }
 }
