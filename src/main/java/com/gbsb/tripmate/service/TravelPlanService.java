@@ -33,7 +33,7 @@ public class TravelPlanService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
-        List<TravelPlan> travelPlanList = travelPlanRepository.findAllByMeeting(meeting);
+        List<TravelPlan> travelPlanList = travelPlanRepository.findAllByMeetingAndIsDeletedFalse(meeting);
         for (TravelPlan value : travelPlanList) {
             if (value.getPlanDate().equals(request.getPlanDate())) {
                 throw new MeetingException(ErrorCode.ALREADY_DATE_EXIST);
@@ -55,7 +55,7 @@ public class TravelPlanService {
         TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        List<PlanItem> planItemList = planItemRepository.findByTravelPlanOrderByStartTimeAsc(travelPlan);
+        List<PlanItem> planItemList = planItemRepository.findByTravelPlanAndIsDeletedFalseOrderByStartTimeAsc(travelPlan);
 
         Place place = placeRepository.findById(request.getPlaceId())
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
@@ -102,7 +102,7 @@ public class TravelPlanService {
         TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        List<PlanItem> planItemList = planItemRepository.findAllByTravelPlanOrderByItemOrderAsc(travelPlan);
+        List<PlanItem> planItemList = planItemRepository.findAllByTravelPlanAndIsDeletedFalseOrderByItemOrderAsc(travelPlan);
         List<PlanItemResponse> planItemResponseList = new ArrayList<>();
         for (PlanItem plan : planItemList) {
             PlanItemResponse planItemResponse = PlanItemResponse.builder()
