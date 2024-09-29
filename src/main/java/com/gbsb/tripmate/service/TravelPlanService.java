@@ -119,4 +119,25 @@ public class TravelPlanService {
         }
         return planItemResponseList;
     }
+
+    public void deletePlanItem(Long planItemId) {
+        PlanItem planItem = planItemRepository.findByPlanItemIdAndIsDeletedFalse(planItemId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_ITEM_ID_NOT_FOUND));
+        planItem.setDeleted(true);
+        planItem.setItemOrder(-1);
+
+        // itemOrder 재정렬
+        Long travelPlanId = planItem.getTravelPlan().getTravelPlanId();
+        TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
+        List<PlanItem> planItemList = planItemRepository.findByTravelPlanAndIsDeletedFalseOrderByStartTimeAsc(travelPlan);
+
+        int itemOrder = 1;
+        for (PlanItem item: planItemList) {
+            item.setItemOrder(itemOrder++);
+            planItemRepository.save(item);
+        }
+
+        planItemRepository.save(planItem);
+    }
 }

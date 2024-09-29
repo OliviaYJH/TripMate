@@ -47,5 +47,11 @@ public class PlanController {
         return new BaseResponse<>("세부 일정 조회에 성공했습니다.", planItemResponseList);
     }
 
-    // 세부 일정 삭제 -> itemOrder 재정렬 필요
+    @PutMapping("/{planItemId}")
+    BaseResponse<Boolean> deletePlanItem(
+        @PathVariable Long planItemId
+    ){
+        travelPlanService.deletePlanItem(planItemId);
+        return new BaseResponse<>("세부 일정 삭제에 성공했습니다", true);
+    }
 }
