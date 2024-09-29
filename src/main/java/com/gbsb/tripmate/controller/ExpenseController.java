@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hibernate.query.sqm.tree.SqmNode.log;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor

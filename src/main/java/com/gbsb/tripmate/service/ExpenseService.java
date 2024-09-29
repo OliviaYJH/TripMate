@@ -86,7 +86,7 @@ public class ExpenseService {
                 .map(Expense::getExpenseAmount)
                 .reduce(0f, Float::sum);
 
-        int memberCount = meeting.getMemberMax(); // 실제 참여 인원을 계산하는 로직이 필요할 수 있습니다.
+        int memberCount = meeting.getMemberMax();
 
         return totalGroupExpense / memberCount;
     }
