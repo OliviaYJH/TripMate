@@ -23,7 +23,8 @@ public enum ErrorCode {
     PLAN_NOT_FOUND("해당하는 여행 계획이 없습니다."),
     PLACE_NOT_FOUND("해당 장소는 없는 장소입니다."),
     INVALID_ITEM_ORDER("해당 순서는 존재하지 않습니다."),
-    ALREADY_SAME_START_TIME_EXIST("해당 시간에 시작하는 여행 계획이 존재합니다.");
+    ALREADY_SAME_START_TIME_EXIST("해당 시간에 시작하는 여행 계획이 존재합니다."),
+    PLAN_ITEM_ID_NOT_FOUND("해당 세부 일정이 없습니다.");
 
     private final String description;
 }
