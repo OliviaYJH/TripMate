@@ -8,6 +8,7 @@ import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
 import com.gbsb.tripmate.repository.ExpenseRepository;
+import com.gbsb.tripmate.repository.MeetingMemberRepository;
 import com.gbsb.tripmate.repository.MeetingRepository;
 import com.gbsb.tripmate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final MeetingMemberRepository meetingMemberRepository;
 
     public Expense createExpense(Long userId, ExpenseCreateRequest request) {
         User user = userRepository.findById(userId)
@@ -39,6 +41,7 @@ public class ExpenseService {
                 .expenseDate(request.getExpenseDate())
                 .isGroupExpense(request.getIsGroupExpense())
                 .createdDate(LocalDateTime.now())
+                .isDeleted(false)
                 .build();
 
         return expenseRepository.save(expense);
@@ -61,7 +64,7 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public void deleteExpense(Long userId, Long expenseId) {
+    public void toggleDeleteExpense(Long userId, Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.INVALID_REQUEST));
 
@@ -70,23 +73,29 @@ public class ExpenseService {
             throw new MeetingException(ErrorCode.INVALID_REQUEST);
         }
 
-        expenseRepository.delete(expense);
+        expense.setIsDeleted(!expense.getIsDeleted());
+        expense.setModifiedDate(LocalDateTime.now());
+        expenseRepository.save(expense);
     }
 
     public List<Expense> getExpensesByMeeting(Long meetingId) {
-        return expenseRepository.findByMeetingMeetingId(meetingId);
+        return expenseRepository.findByMeetingMeetingIdAndIsDeletedFalse(meetingId);
     }
 
     public Float calculatePerPersonExpense(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
-        List<Expense> groupExpenses = expenseRepository.findByMeetingMeetingIdAndIsGroupExpense(meetingId, true);
+        List<Expense> groupExpenses = expenseRepository.findByMeetingMeetingIdAndIsGroupExpenseAndIsDeletedFalse(meetingId, true);
         Float totalGroupExpense = groupExpenses.stream()
                 .map(Expense::getExpenseAmount)
                 .reduce(0f, Float::sum);
 
-        int memberCount = meeting.getMemberMax();
+        int memberCount = meetingMemberRepository.countMembersByGroupId(meetingId);
+
+        if (memberCount == 0) {
+            throw new MeetingException(ErrorCode.INVALID_REQUEST);
+        }
 
         return totalGroupExpense / memberCount;
     }

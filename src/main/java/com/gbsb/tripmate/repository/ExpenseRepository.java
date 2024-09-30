@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-    List<Expense> findByMeetingMeetingId(Long meetingId);
-    List<Expense> findByMeetingMeetingIdAndIsGroupExpense(Long meetingId, Boolean isGroupExpense);
+    List<Expense> findByMeetingMeetingIdAndIsDeletedFalse(Long meetingId);
+    List<Expense> findByMeetingMeetingIdAndIsGroupExpenseAndIsDeletedFalse(Long meetingId, Boolean isGroupExpense);
 }

@@ -20,16 +20,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("api/expenses")
 public class ExpenseController {
+
     private final ExpenseService expenseService;
 
-    /*
-    @PostMapping
-    public BaseResponse<ExpenseResponse> createExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
-                                                       @RequestBody ExpenseCreateRequest request) {
-        Expense expense = expenseService.createExpense(user.getId(), request);
-        return new BaseResponse<>("가계부 항목이 추가되었습니다.", convertToExpenseResponse(expense));
-    }
-     */
     @PostMapping
     public BaseResponse<ExpenseResponse> createExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
                                                        @RequestBody ExpenseCreateRequest request) {
@@ -52,11 +45,11 @@ public class ExpenseController {
         return new BaseResponse<>("가계부 항목이 수정되었습니다.", convertToExpenseResponse(expense));
     }
 
-    @DeleteMapping("/{expenseId}")
-    public BaseResponse<Void> deleteExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
-                                            @PathVariable Long expenseId) {
-        expenseService.deleteExpense(user.getId(), expenseId);
-        return new BaseResponse<>("가계부 항목이 삭제되었습니다.", null);
+    @PutMapping("/{expenseId}/delete")
+    public BaseResponse<Void> toggleDeleteExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
+                                                  @PathVariable Long expenseId) {
+        expenseService.toggleDeleteExpense(user.getId(), expenseId);
+        return new BaseResponse<>("가계부 항목 삭제 상태가 변경되었습니다.", null);
     }
 
     @GetMapping("/meeting/{meetingId}")
