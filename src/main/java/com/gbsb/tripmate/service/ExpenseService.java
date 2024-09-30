@@ -83,7 +83,7 @@ public class ExpenseService {
     }
 
     public Float calculatePerPersonExpense(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
+        meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
         List<Expense> groupExpenses = expenseRepository.findByMeetingMeetingIdAndIsGroupExpenseAndIsDeletedFalse(meetingId, true);

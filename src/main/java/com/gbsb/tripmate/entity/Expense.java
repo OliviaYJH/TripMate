@@ -37,7 +37,7 @@ public class Expense {
     @Column(nullable = false)
     private Boolean isGroupExpense;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(nullable = false)
     private Boolean isDeleted = false;
 
     @Column(nullable = false)
