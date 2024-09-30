@@ -29,21 +29,21 @@ public class PlanController {
 
     // 세부 일정 추가
     @PostMapping("/{meetingId}/{travelPlanId}")
-    BaseResponse<PlanItem> addPlanItem(
+    BaseResponse<Boolean> addPlanItem(
             @PathVariable Long meetingId,
             @PathVariable Long travelPlanId,
             @RequestBody PlanItemCreate.Request request
     ) {
         travelPlanService.createPlanItem(meetingId, travelPlanId, request);
-        return new BaseResponse<>("세부 일정을 생성했습니다.", null);
+        return new BaseResponse<>("세부 일정을 생성했습니다.", true);
     }
 
     // 세부 일정 조회
-    @GetMapping("/{travelPlanId}")
+    @GetMapping("/{planItemId}")
     BaseResponse<List<PlanItemResponse>> getPlanItem(
-            @PathVariable Long travelPlanId
+            @PathVariable Long planItemId
     ){
-        List<PlanItemResponse> planItemResponseList = travelPlanService.getPlanItemDetail(travelPlanId);
+        List<PlanItemResponse> planItemResponseList = travelPlanService.getPlanItemDetail(planItemId);
         return new BaseResponse<>("세부 일정 조회에 성공했습니다.", planItemResponseList);
     }
 
