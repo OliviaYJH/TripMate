@@ -28,7 +28,7 @@ public class Place {
 
     private String placeUrl;
 
-    private BigDecimal x;
+    private double x;
 
-    private BigDecimal y;
+    private double y;
 }

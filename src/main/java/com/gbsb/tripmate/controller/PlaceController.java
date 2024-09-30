@@ -2,6 +2,7 @@ package com.gbsb.tripmate.controller;
 
 import com.gbsb.tripmate.dto.BaseResponse;
 import com.gbsb.tripmate.dto.PlacePageResponse;
+import com.gbsb.tripmate.dto.SearchPlaceWithKeywordResponse;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.service.PlaceService;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,27 @@ public class PlaceController {
     ) {
         Place place = placeService.getPlaceDetail(placeId);
         return new BaseResponse<>("장소 상세 정보 조회 성공", place);
+    }
+
+    // 맛집 추천 api
+    @GetMapping("/restaurant")
+    BaseResponse<SearchPlaceWithKeywordResponse> getRestaurant(
+            @RequestParam Long placeId,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        SearchPlaceWithKeywordResponse placePageResponse = placeService.getRestaurant(placeId, page, size);
+        return new BaseResponse<>("맛집 정보 조회 성공", placePageResponse);
+    }
+
+    // 명소 추천 api
+    @GetMapping("/attraction")
+    BaseResponse<SearchPlaceWithKeywordResponse> getAttraction(
+            @RequestParam Long placeId,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        SearchPlaceWithKeywordResponse placePageResponse = placeService.getAttraction(placeId, page, size);
+        return new BaseResponse<>("명소 정보 조회 성공", placePageResponse);
     }
 }

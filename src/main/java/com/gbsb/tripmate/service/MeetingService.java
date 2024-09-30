@@ -135,6 +135,7 @@ public class MeetingService {
             }
 
             meeting.setTripGroup(request);
+            meeting.setUpdatedDate(LocalDate.now());
             meetingRepository.save(meeting);
         }
 
@@ -220,7 +221,7 @@ public class MeetingService {
             List<LocalDate> participationDates = dailyParticipationRepository.findParticipationDatesById(user.getId());
 
             for (LocalDate participationDate : participationDates) {
-                DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDate(user, participationDate)
+                DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDateAndIsDeletedFalse(user, participationDate)
                         .orElseThrow(() -> new RuntimeException("해당 날짜의 참여 데이터가 없습니다."));
 
                 dailyParticipationRepository.delete(dailyParticipation);
@@ -251,7 +252,7 @@ public class MeetingService {
             List<LocalDate> participationDates = dailyParticipationRepository.findParticipationDatesById(member.getUser().getId());
 
             for (LocalDate participationDate : participationDates) {
-                DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDate(member.getUser(), participationDate)
+                DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDateAndIsDeletedFalse(member.getUser(), participationDate)
                         .orElseThrow(() -> new RuntimeException("해당 날짜의 참여 데이터가 없습니다."));
 
                 dailyParticipationRepository.delete(dailyParticipation);
