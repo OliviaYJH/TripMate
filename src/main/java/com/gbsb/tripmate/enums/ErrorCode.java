@@ -28,7 +28,8 @@ public enum ErrorCode {
     NO_ROUTE_FOUND("경로를 찾을 수 없습니다."),
     JSON_PARSING_ERROR("JSON 파싱 중 오류가 발생했습니다."),
     KAKAO_API_ERROR("카카오 API 사용 중 오류가 발생했습니다."),
-    PLAN_ITEM_ID_NOT_FOUND("해당 세부 일정이 없습니다.");
+    PLAN_ITEM_ID_NOT_FOUND("해당 세부 일정이 없습니다."),
+    NO_MODIFICATION_PERMISSION("해당 항목에 대한 수정 권한이 없습니다.");
 
     private final String description;
 }

@@ -41,6 +41,7 @@ public class ExpenseService {
                 .expenseDate(request.getExpenseDate())
                 .isGroupExpense(request.getIsGroupExpense())
                 .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
 
@@ -52,7 +53,7 @@ public class ExpenseService {
                 .orElseThrow(() -> new MeetingException(ErrorCode.INVALID_REQUEST));
 
         if (!expense.getCreatedBy().getId().equals(userId)) {
-            throw new MeetingException(ErrorCode.INVALID_REQUEST);
+            throw new MeetingException(ErrorCode.NO_MODIFICATION_PERMISSION);
         }
 
         expense.setExpenseDescription(request.getExpenseDescription());
