@@ -13,10 +13,10 @@ import java.util.List;
 @Repository
 public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
 
-    List<TravelPlan> findAllByMeeting(Meeting meeting);
+    List<TravelPlan> findAllByMeetingAndIsDeletedFalse(Meeting meeting);
 
     @Query("SELECT MIN(tp.planDate) FROM TravelPlan tp WHERE tp.meeting.meetingId IN "
             + "(SELECT mm.meeting.meetingId FROM MeetingMember mm WHERE mm.user.Id = :Id) "
-            + "AND tp.planDate > CURRENT_DATE")
+            + "AND tp.planDate > CURRENT_DATE AND tp.isDeleted = false")
     LocalDate findNextTravelDateByUserId(@Param("Id") Long Id);
 }

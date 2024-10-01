@@ -40,9 +40,9 @@ public class PlanItem {
     private LocalTime endTime;
 
     @Column(nullable = false)
-    private BigDecimal x;
+    private double x;
     @Column(nullable = false)
-    private BigDecimal y;
+    private double y;
 
     private int itemOrder;
 
