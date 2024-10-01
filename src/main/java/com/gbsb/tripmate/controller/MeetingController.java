@@ -89,4 +89,15 @@ public class MeetingController {
             return new BaseResponse<>(e.getMessage(), false);
         }
     }
+
+    // 모임 검색
+    @GetMapping("/search")
+    public Page<MeetingResponse> searchMeetings(
+            @RequestParam String meetingTitle,
+            @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return meetingService.searchMeetings(user.getId(), meetingTitle, page, size);
+    }
 }
