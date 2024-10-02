@@ -1,16 +1,10 @@
 package com.gbsb.tripmate.service;
 
 import com.gbsb.tripmate.dto.*;
-import com.gbsb.tripmate.entity.DailyParticipation;
-import com.gbsb.tripmate.entity.Meeting;
-import com.gbsb.tripmate.entity.MeetingMember;
-import com.gbsb.tripmate.entity.User;
+import com.gbsb.tripmate.entity.*;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
-import com.gbsb.tripmate.repository.DailyParticipationRepository;
-import com.gbsb.tripmate.repository.MeetingMemberRepository;
-import com.gbsb.tripmate.repository.MeetingRepository;
-import com.gbsb.tripmate.repository.UserRepository;
+import com.gbsb.tripmate.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +28,8 @@ public class MeetingService {
     private final UserRepository userRepository;
     private final MeetingMemberRepository meetingMemberRepository;
     private final DailyParticipationRepository dailyParticipationRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatService chatService;
 
     // 모임 생성
     public Meeting createMeeting(Long id, MeetingCreateRequest request) {
@@ -54,6 +50,14 @@ public class MeetingService {
                 .createdDate(LocalDate.now())
                 .build();
 
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(request.getMeetingTitle())
+                .user(user)
+                .isDeleted(false)
+                .build();
+
+        meeting.setChatRoom(chatRoom);
+
         Meeting savedMeeting = meetingRepository.save(meeting);
 
         // 모임장을 모임 멤버에 추가
@@ -64,7 +68,9 @@ public class MeetingService {
                 .joinDate(LocalDate.now())
                 .build();
 
+        chatService.addUserToChat(chatRoom.getRoomId(), leader.getUser().getEmail());
         meetingMemberRepository.save(leader);
+
         return savedMeeting;
     }
 
@@ -107,6 +113,13 @@ public class MeetingService {
         // 여행 기간 중 삭제 제한
         if (!LocalDate.now().isBefore(meeting.getTravelStartDate()) && !LocalDate.now().isAfter(meeting.getTravelEndDate())) {
             throw new RuntimeException("여행기간 중에는 모임을 삭제할 수 없습니다.");
+        }
+
+        // 채팅방 삭제
+        if (meeting.getChatRoom() != null) {
+            ChatRoom chatRoom = meeting.getChatRoom();
+            chatRoom.setIsDeleted(true);
+            chatRoomRepository.save(chatRoom);
         }
 
         meeting.setIsDeleted(true);
@@ -168,6 +181,17 @@ public class MeetingService {
                 .build();
         meetingMemberRepository.save(meetingMember);
 
+        // 채팅방에 참여
+        chatService.addUserToChat(meeting.getChatRoom().getRoomId(), user.getEmail());
+
+        ChatMessageDTO enterMessage = ChatMessageDTO.builder()
+                    .roomId(meeting.getChatRoom().getRoomId())
+                    .writer(user.getNickname())
+                    .message(user.getNickname() + "님이 채팅방에 참여했습니다.")
+                    .build();
+
+        chatService.sendSystemMessage(enterMessage);
+
         if (request.getTravelStartDate().isAfter(request.getTravelEndDate())) {
             throw new MeetingException(ErrorCode.INVALID_TRAVEL_DATE);
         }
@@ -224,10 +248,21 @@ public class MeetingService {
             DailyParticipation dailyParticipation = dailyParticipationRepository.findByUserAndParticipationDateAndIsDeletedFalse(user, participationDate)
                     .orElseThrow(() -> new RuntimeException("해당 날짜의 참여 데이터가 없습니다."));
 
-            dailyParticipationRepository.delete(dailyParticipation);
-        }
+        dailyParticipationRepository.delete(dailyParticipation);
 
+        }
+      
         meetingMemberRepository.delete(meetingMember);
+
+        chatService.removeUserFromChat(meeting.getChatRoom().getRoomId(), user.getEmail());
+
+        ChatMessageDTO outMessage = ChatMessageDTO.builder()
+                    .roomId(meeting.getChatRoom().getRoomId())
+                    .writer(user.getNickname())
+                    .message(user.getNickname() + "님이 채팅방에서 퇴장했습니다.")
+                    .build();
+
+        chatService.sendSystemMessage(outMessage);
     }
 
     // 멤버 내보내기
@@ -262,6 +297,16 @@ public class MeetingService {
         member.setRemoveReason(request.getReason());
         member.setIsRemoved(true);
         meetingMemberRepository.save(member);
+      
+        chatService.removeUserFromChat(meeting.getChatRoom().getRoomId(), member.getUser().getEmail());
+
+            ChatMessageDTO outMessage = ChatMessageDTO.builder()
+                    .roomId(meeting.getChatRoom().getRoomId())
+                    .writer(member.getUser().getNickname())
+                    .message(member.getUser().getNickname() + "님이 채팅방에서 퇴장했습니다.")
+                    .build();
+
+            chatService.sendSystemMessage(outMessage);
     }
 
     // 사용자 ID와 모임 제목으로 모임 검색
