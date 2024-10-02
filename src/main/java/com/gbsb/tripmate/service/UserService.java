@@ -15,4 +15,5 @@ public interface UserService {
     Optional<User> getUserInfo(Long userId);
     User updateUserProfile(Long userId, UpdateUserProfileRequest dto);
     Page<Meeting> getMeetingsByUserId(Long userId, Pageable pageable);
+    boolean existsByNickname(String nickname);
 }

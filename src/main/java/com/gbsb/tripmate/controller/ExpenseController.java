@@ -7,6 +7,9 @@ import com.gbsb.tripmate.dto.ExpenseUpdateRequest;
 import com.gbsb.tripmate.entity.Expense;
 import com.gbsb.tripmate.service.CustomUserDetailsService;
 import com.gbsb.tripmate.service.ExpenseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,13 +22,16 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/expenses")
+@Tag(name = "Expenses", description = "가계부 API")
 public class ExpenseController {
 
     private final ExpenseService expenseService;
 
     @PostMapping
-    public BaseResponse<ExpenseResponse> createExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
-                                                       @RequestBody ExpenseCreateRequest request) {
+    @Operation(summary = "지출 생성", description = "새로운 지출 항목을 생성합니다")
+    public BaseResponse<ExpenseResponse> createExpense(
+            @Parameter(description = "인증된 사용자") @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
+            @Parameter(description = "지출 생성 요청") @RequestBody ExpenseCreateRequest request) {
         log.debug("Creating expense: {}", request);
         try {
             Expense expense = expenseService.createExpense(user.getId(), request);
@@ -38,22 +44,28 @@ public class ExpenseController {
     }
 
     @PutMapping("/{expenseId}")
-    public BaseResponse<ExpenseResponse> updateExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
-                                                       @PathVariable Long expenseId,
-                                                       @RequestBody ExpenseUpdateRequest request) {
+    @Operation(summary = "지출 수정", description = "기존 지출 항목을 수정합니다")
+    public BaseResponse<ExpenseResponse> updateExpense(
+            @Parameter(description = "인증된 사용자") @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
+            @Parameter(description = "지출 ID") @PathVariable Long expenseId,
+            @Parameter(description = "지출 수정 요청") @RequestBody ExpenseUpdateRequest request) {
         Expense expense = expenseService.updateExpense(user.getId(), expenseId, request);
         return new BaseResponse<>("가계부 항목이 수정되었습니다.", convertToExpenseResponse(expense));
     }
 
     @PutMapping("/{expenseId}/delete")
-    public BaseResponse<Void> toggleDeleteExpense(@AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
-                                                  @PathVariable Long expenseId) {
+    @Operation(summary = "지출 삭제 상태 변경", description = "지출 항목의 삭제 상태를 변경합니다")
+    public BaseResponse<Void> toggleDeleteExpense(
+            @Parameter(description = "인증된 사용자") @AuthenticationPrincipal CustomUserDetailsService.CustomUserDetails user,
+            @Parameter(description = "지출 ID") @PathVariable Long expenseId) {
         expenseService.toggleDeleteExpense(user.getId(), expenseId);
         return new BaseResponse<>("가계부 항목 삭제 상태가 변경되었습니다.", null);
     }
 
     @GetMapping("/meeting/{meetingId}")
-    public BaseResponse<List<ExpenseResponse>> getExpensesByMeeting(@PathVariable Long meetingId) {
+    @Operation(summary = "모임별 지출 조회", description = "특정 모임의 모든 지출을 조회합니다")
+    public BaseResponse<List<ExpenseResponse>> getExpensesByMeeting(
+            @Parameter(description = "모임 ID") @PathVariable Long meetingId) {
         List<Expense> expenses = expenseService.getExpensesByMeeting(meetingId);
         List<ExpenseResponse> expenseResponses = expenses.stream()
                 .map(this::convertToExpenseResponse)
@@ -62,7 +74,9 @@ public class ExpenseController {
     }
 
     @GetMapping("/meeting/{meetingId}/per-person")
-    public BaseResponse<Float> getPerPersonExpense(@PathVariable Long meetingId) {
+    @Operation(summary = "인당 지출 계산", description = "모임의 인당 지출을 계산합니다")
+    public BaseResponse<Float> getPerPersonExpense(
+            @Parameter(description = "모임 ID") @PathVariable Long meetingId) {
         Float perPersonExpense = expenseService.calculatePerPersonExpense(meetingId);
         return new BaseResponse<>("인당 경비 계산 완료", perPersonExpense);
     }
