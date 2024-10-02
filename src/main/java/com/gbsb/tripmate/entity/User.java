@@ -72,4 +72,3 @@ public class User {
         else return AgeRange.SIXTIES_PLUS;
     }
 }
-
