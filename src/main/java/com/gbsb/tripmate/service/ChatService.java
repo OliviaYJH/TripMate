@@ -1,60 +1,63 @@
 package com.gbsb.tripmate.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gbsb.tripmate.config.WebSocketConfig;
-import com.gbsb.tripmate.dto.ChatRoom;
-import com.gbsb.tripmate.entity.ChatMessage;
+import com.gbsb.tripmate.dto.BaseResponse;
+import com.gbsb.tripmate.dto.ChatMessageDTO;
+import com.gbsb.tripmate.entity.Chat;
+import com.gbsb.tripmate.entity.ChatRoom;
+import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.enums.ErrorCode;
 import com.gbsb.tripmate.exception.MeetingException;
-import com.gbsb.tripmate.repository.ChatMessageRepository;
+import com.gbsb.tripmate.repository.ChatRepository;
 import com.gbsb.tripmate.repository.ChatRoomRepository;
-import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
+import com.gbsb.tripmate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final ObjectMapper objectMapper;
-    private Map<String, ChatRoom> chatRooms;
+    private final ChatRepository chatRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
 
-    @PostConstruct
-    private void init() {
-        chatRooms = new LinkedHashMap<>();
+    public void addUserToChat(Long roomId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.CHATROOM_NOT_FOUND));
+
+        chatRoom.addParticipant(user);
+        chatRoomRepository.save(chatRoom);
     }
 
-    public ChatRoom findRoomById(String roomId) {
-        return chatRooms.get(roomId);
+    public void removeUserFromChat(Long roomId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.CHATROOM_NOT_FOUND));
+
+        chatRoom.removeParticipant(user);
+        chatRoomRepository.save(chatRoom);
     }
 
-    public ChatRoom createRoom(String name) {
-        String randomId = UUID.randomUUID().toString();
-        ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(randomId)
-                .name(name)
-                .build();
-        chatRooms.put(randomId, chatRoom);
-        return chatRoom;
+    public void sendSystemMessage (ChatMessageDTO message) {
+        messagingTemplate.convertAndSend("/sub/chat/room" + message.getRoomId(), message);
     }
 
-    public <T> void sendMessage(WebSocketSession session, T message) {
-        try {
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+    @Transactional
+    public BaseResponse<Chat> addChat(ChatMessageDTO chatMessageDTO) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(chatMessageDTO.getRoomId())
+                .orElseThrow(() -> new MeetingException(ErrorCode.CHATROOM_NOT_FOUND));
+
+        Chat chater = chatRepository.save(chatMessageDTO.toChat(chatRoom));
+
+        return new BaseResponse<>("채팅이 성공적으로 저장되었습니다.", chater);
     }
 }
 

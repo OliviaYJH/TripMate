@@ -49,7 +49,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/meetings").permitAll()
+                        .requestMatchers("/api/auth/**", "/meetings","/websocket/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
