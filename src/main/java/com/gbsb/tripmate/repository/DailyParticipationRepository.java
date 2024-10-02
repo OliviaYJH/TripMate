@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface DailyParticipationRepository extends JpaRepository<DailyParticipation, Long> {
-    @Query("SELECT dp.participationDate FROM DailyParticipation dp WHERE dp.user.id = :id")
+    @Query("SELECT dp.participationDate FROM DailyParticipation dp WHERE dp.user.id = :id AND dp.isDeleted = false")
     List<LocalDate> findParticipationDatesById(Long id);
 
-    Optional<DailyParticipation> findByUserAndParticipationDate(User user, LocalDate participationDate);
+    Optional<DailyParticipation> findByUserAndParticipationDateAndIsDeletedFalse(User user, LocalDate participationDate);
 }

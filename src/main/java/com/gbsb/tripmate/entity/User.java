@@ -1,6 +1,6 @@
 package com.gbsb.tripmate.entity;
 
-import com.gbsb.tripmate.enums.AgeGroup;
+import com.gbsb.tripmate.enums.AgeRange;
 import com.gbsb.tripmate.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,7 +42,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AgeGroup ageGroup;
+    private AgeRange ageRange;
 
     @Column(nullable = false)
     private String name;
@@ -59,17 +59,16 @@ public class User {
     private void calculateAgeGroup() {
         if (this.birthdate != null) {
             int age = LocalDate.now().getYear() - this.birthdate.getYear();
-            this.ageGroup = getAgeGroupFromAge(age);
+            this.ageRange = getAgeGroupFromAge(age);
         }
     }
 
-    private AgeGroup getAgeGroupFromAge(int age) {
-        if (age < 20) return AgeGroup.TEENS;
-        else if (age < 30) return AgeGroup.TWENTIES;
-        else if (age < 40) return AgeGroup.THIRTIES;
-        else if (age < 50) return AgeGroup.FORTIES;
-        else if (age < 60) return AgeGroup.FIFTIES;
-        else return AgeGroup.SIXTIES_PLUS;
+    private AgeRange getAgeGroupFromAge(int age) {
+        if (age < 20) return AgeRange.TEEN;
+        else if (age < 30) return AgeRange.TWENTIES;
+        else if (age < 40) return AgeRange.THIRTIES;
+        else if (age < 50) return AgeRange.FORTIES;
+        else if (age < 60) return AgeRange.FIFTIES;
+        else return AgeRange.SIXTIES_PLUS;
     }
 }
-

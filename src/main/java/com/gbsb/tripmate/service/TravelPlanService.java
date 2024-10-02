@@ -2,6 +2,7 @@ package com.gbsb.tripmate.service;
 
 import com.gbsb.tripmate.dto.PlanCreate;
 import com.gbsb.tripmate.dto.PlanItemCreate;
+import com.gbsb.tripmate.dto.PlanItemResponse;
 import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.entity.Place;
 import com.gbsb.tripmate.entity.TravelPlan;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,7 +33,7 @@ public class TravelPlanService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
-        List<TravelPlan> travelPlanList = travelPlanRepository.findAllByMeeting(meeting);
+        List<TravelPlan> travelPlanList = travelPlanRepository.findAllByMeetingAndIsDeletedFalse(meeting);
         for (TravelPlan value : travelPlanList) {
             if (value.getPlanDate().equals(request.getPlanDate())) {
                 throw new MeetingException(ErrorCode.ALREADY_DATE_EXIST);
@@ -53,7 +55,7 @@ public class TravelPlanService {
         TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        List<PlanItem> planItemList = planItemRepository.findByTravelPlanOrderByStartTimeAsc(travelPlan);
+        List<PlanItem> planItemList = planItemRepository.findByTravelPlanAndIsDeletedFalseOrderByStartTimeAsc(travelPlan);
 
         Place place = placeRepository.findById(request.getPlaceId())
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLACE_NOT_FOUND));
@@ -93,6 +95,49 @@ public class TravelPlanService {
                 .y(place.getY())
                 .itemOrder(newOrder)
                 .build();
+        planItemRepository.save(planItem);
+    }
+
+    public List<PlanItemResponse> getPlanItemDetail(Long travelPlanId) {
+        TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
+
+        List<PlanItem> planItemList = planItemRepository.findAllByTravelPlanAndIsDeletedFalseOrderByItemOrderAsc(travelPlan);
+        List<PlanItemResponse> planItemResponseList = new ArrayList<>();
+        for (PlanItem plan : planItemList) {
+            PlanItemResponse planItemResponse = PlanItemResponse.builder()
+                    .planItemId(plan.getPlanItemId())
+                    .planDate(plan.getTravelPlan().getPlanDate())
+                    .itemName(plan.getItemName())
+                    .itemType(plan.getItemType())
+                    .itemDescription(plan.getItemDescription())
+                    .startTime(plan.getStartTime())
+                    .endTime(plan.getEndTime())
+                    .itemOrder(plan.getItemOrder())
+                    .build();
+            planItemResponseList.add(planItemResponse);
+        }
+        return planItemResponseList;
+    }
+
+    public void deletePlanItem(Long planItemId) {
+        PlanItem planItem = planItemRepository.findByPlanItemIdAndIsDeletedFalse(planItemId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_ITEM_ID_NOT_FOUND));
+        planItem.setDeleted(true);
+        planItem.setItemOrder(-1);
+
+        // itemOrder 재정렬
+        Long travelPlanId = planItem.getTravelPlan().getTravelPlanId();
+        TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
+        List<PlanItem> planItemList = planItemRepository.findByTravelPlanAndIsDeletedFalseOrderByStartTimeAsc(travelPlan);
+
+        int itemOrder = 1;
+        for (PlanItem item: planItemList) {
+            item.setItemOrder(itemOrder++);
+            planItemRepository.save(item);
+        }
+
         planItemRepository.save(planItem);
     }
 }
