@@ -36,6 +36,10 @@ public class MeetingService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new MeetingException(ErrorCode.USER_NOT_FOUND));
 
+        if (request.getTravelStartDate().isBefore(LocalDate.now())) {
+            throw new MeetingException(ErrorCode.INVALID_MEETING_TRAVEL_START_DATE);
+        }
+
         Meeting meeting = Meeting.builder()
                 .meetingLeader(user)
                 .meetingTitle(request.getMeetingTitle())
@@ -48,6 +52,8 @@ public class MeetingService {
                 .travelEndDate(request.getTravelEndDate())
                 .memberMax(request.getMemberMax())
                 .createdDate(LocalDate.now())
+                .updatedDate(LocalDate.now())
+                .isDeleted(false)
                 .build();
 
         ChatRoom chatRoom = ChatRoom.builder()
@@ -176,6 +182,8 @@ public class MeetingService {
                 .user(user)
                 .meeting(meeting)
                 .joinDate(LocalDate.now())
+                .isRemoved(false)
+                .removeReason("")
                 .isLeader(false)
                 // 기본값은 false이고 모임을 생성할 때 모임 테이블과 모임멤버 테이블에 데이터 넣을 때 true로 하기
                 .build();
@@ -249,10 +257,10 @@ public class MeetingService {
                     .orElseThrow(() -> new RuntimeException("해당 날짜의 참여 데이터가 없습니다."));
 
         dailyParticipationRepository.delete(dailyParticipation);
-
         }
-      
-        meetingMemberRepository.delete(meetingMember);
+
+        meetingMember.setIsRemoved(true);
+        meetingMemberRepository.save(meetingMember);
 
         chatService.removeUserFromChat(meeting.getChatRoom().getRoomId(), user.getEmail());
 
