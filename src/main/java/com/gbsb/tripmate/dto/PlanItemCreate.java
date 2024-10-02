@@ -4,7 +4,6 @@ import com.gbsb.tripmate.enums.TravelStyle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class PlanItemCreate {

@@ -4,18 +4,14 @@ import com.gbsb.tripmate.entity.User;
 import com.gbsb.tripmate.dto.UpdateUserProfileRequest;
 import com.gbsb.tripmate.entity.Meeting;
 import com.gbsb.tripmate.repository.MeetingRepository;
-import com.gbsb.tripmate.repository.TravelPlanRepository;
 import com.gbsb.tripmate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Service
@@ -24,7 +20,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TravelPlanRepository travelPlanRepository;
     private final MeetingRepository meetingRepository;
 
     @Override
