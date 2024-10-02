@@ -36,7 +36,7 @@ public class RouteService {
         TravelPlan travelPlan = travelPlanRepository.findById(travelPlanId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.PLAN_NOT_FOUND));
 
-        List<PlanItem> planItems = planItemRepository.findByTravelPlanOrderByStartTimeAsc(travelPlan);
+        List<PlanItem> planItems = planItemRepository.findByTravelPlanAndIsDeletedFalseOrderByStartTimeAsc(travelPlan);
 
         if (planItems.size() < 2) {
             throw new MeetingException(ErrorCode.INSUFFICIENT_PLAN_ITEMS);
@@ -88,8 +88,8 @@ public class RouteService {
     private Map<String, Object> createCoordinate(PlanItem planItem) {
         Map<String, Object> coordinate = new HashMap<>();
         coordinate.put("name", planItem.getItemName());
-        coordinate.put("x", planItem.getX().toString());
-        coordinate.put("y", planItem.getY().toString());
+        coordinate.put("x", String.valueOf(planItem.getX()));
+        coordinate.put("y", String.valueOf(planItem.getY()));
         return coordinate;
     }
 }
