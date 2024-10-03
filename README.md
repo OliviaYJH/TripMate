@@ -3,8 +3,8 @@
 ## 👨‍👩‍👧‍👦 Contributers
 |<img src="https://avatars.githubusercontent.com/u/163841621?v=4" width="128" />|<img src="https://avatars.githubusercontent.com/u/163849108?v=4" width="128" />|<img src="https://avatars.githubusercontent.com/u/81751105?v=4" width="128" />|<img src="https://avatars.githubusercontent.com/u/178886706?v=4" width="128" />|
 |:---------:|:---------:|:---------:|:---------:|
-|[김정훈](https://github.com/junseo511)|[백초이](https://github.com/OliviaYJH)|[유정현](https://github.com/OliviaYJH)|[전원식](https://github.com/leeseokchan00)|
-|회원가입/로그인</br>가계부<br>경로 탐색|모임 개설 및 삭제</br>모임 탈퇴 및 내보내기<br>실시간 채팅|모임 참여 및 수정</br>장소 검색<br>일정 추가|마이페이지</br>모임 검색|
+|[김정훈](https://github.com/JHKim9824)|[백초이](https://github.com/Baekchoi)|[유정현](https://github.com/OliviaYJH)|[전원식](https://github.com/Wonsik1)|
+|회원가입/로그인</br>가계부<br>경로 탐색|모임 개설, 삭제 및 목록 조회</br>모임 탈퇴 및 내보내기<br>실시간 채팅|모임 참여 및 수정</br>장소 검색<br>일정 추가|마이페이지</br>모임 검색|
 
 ## **💪 기획 배경**
 
