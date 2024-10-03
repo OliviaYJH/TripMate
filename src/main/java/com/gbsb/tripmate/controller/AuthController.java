@@ -5,8 +5,13 @@ import com.gbsb.tripmate.dto.JwtAuthenticationResponse;
 import com.gbsb.tripmate.dto.LoginRequest;
 import com.gbsb.tripmate.dto.SignUpRequest;
 import com.gbsb.tripmate.entity.User;
+import com.gbsb.tripmate.enums.ErrorCode;
+import com.gbsb.tripmate.exception.MeetingException;
 import com.gbsb.tripmate.service.UserService;
 import com.gbsb.tripmate.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +25,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "인증 관련 API")
 public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -31,7 +37,16 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+    @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
+    public ResponseEntity<?> registerUser(
+            @Parameter(description = "회원가입 정보", required = true)
+            @Valid @RequestBody SignUpRequest signUpRequest) {
+        if (userService.existsByEmail(signUpRequest.getEmail())) {
+            throw new MeetingException(ErrorCode.INVALID_REQUEST, "Email is already in use");
+        }
+        if (userService.existsByNickname(signUpRequest.getNickname())) {
+            throw new MeetingException(ErrorCode.INVALID_REQUEST, "Nickname is already in use");
+        }
         User user = new User();
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(signUpRequest.getPassword());
@@ -47,7 +62,10 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    @Operation(summary = "로그인", description = "사용자 인증을 수행합니다.")
+    public ResponseEntity<?> authenticateUser(
+            @Parameter(description = "로그인 정보", required = true)
+            @Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -62,7 +80,10 @@ public class AuthController {
     }
 
     @GetMapping("/check-email")
-    public ResponseEntity<?> checkEmailAvailability(@RequestParam String email) {
+    @Operation(summary = "이메일 중복 확인", description = "이메일의 사용 가능 여부를 확인합니다.")
+    public ResponseEntity<?> checkEmailAvailability(
+            @Parameter(description = "확인할 이메일", required = true)
+            @RequestParam String email) {
         boolean isAvailable = !userService.existsByEmail(email);
         return ResponseEntity.ok(new ApiResponse(isAvailable,
                 isAvailable ? "Email is available" : "Email is already in use"));
