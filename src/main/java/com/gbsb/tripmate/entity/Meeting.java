@@ -31,6 +31,10 @@ public class Meeting {
     @Lob
     private String meetingDescription;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "room_id")
+    private ChatRoom chatRoom;
+
     @Column
     @Enumerated(EnumType.STRING)
     private Gender genderCondition;
